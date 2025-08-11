@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: grocademy-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: grocademy
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: grocademy-app
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
+    restart: unless-stopped
+
+volumes:
+  dbdata:

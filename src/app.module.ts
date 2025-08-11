@@ -15,11 +15,7 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('DB_HOST', 'db'), // untuk docker, atau 'localhost' kalau belum dockerized
-        port: configService.get('DB_PORT', 5432),
-        username: configService.get('DB_USERNAME', 'postgres'),
-        password: configService.get('DB_PASSWORD', 'postgres'),
-        database: configService.get('DB_NAME', 'grocademy'),
+        url: process.env.DATABASE_URL,
         synchronize: true,  // false kalau pakai migration
         entities: [User],
         autoLoadEntities: true,

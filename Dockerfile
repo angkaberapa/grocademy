@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:22
 
 WORKDIR /app
 
@@ -13,4 +13,4 @@ COPY src/views ./src/views
 
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:dev"]
