@@ -97,5 +97,12 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
+
+how to build
+docker-compose -f docker-compose.dev.yml up --build -d
+
 how to run
 docker-compose -f docker-compose.dev.yml up -d
+
+how to stop
+docker-compose -f docker-compose.dev.yml down
