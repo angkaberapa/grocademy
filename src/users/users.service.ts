@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { User, UserRole } from './users.entity';
@@ -171,6 +171,9 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+    if (user.role !== UserRole.USER) {
+      throw new ForbiddenException('Access denied');
+    }
 
     // Check if email is being updated and if it already exists
     if (updateDto.email && updateDto.email !== user.email) {
@@ -222,6 +225,9 @@ export class UsersService {
     const user = await this.findById(id);
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+    if (user.role !== UserRole.USER) {
+      throw new ForbiddenException('Access denied');
     }
 
     await this.usersRepository.remove(user);

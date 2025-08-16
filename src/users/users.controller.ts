@@ -77,7 +77,7 @@ export class UsersController {
   @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   @ApiResponse({ status: 409, description: 'Conflict - Email already exists' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required or Admin can\'t be updated' })
   async updateUser(
     @Param('id') id: string,
     @Body() updateDto: UpdateUserBodyDto
@@ -91,7 +91,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin role required or Admin can\'t be deleted' })
   async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
     await this.usersService.deleteUser(id);
     return { message: 'User deleted successfully' };
