@@ -42,7 +42,7 @@ export class UpdateUserBodyDto {
 
   @ApiProperty({
     description: 'User new password (optional)',
-    example: 'newpassword123',
+    example: 'newPassword123',
     required: false,
   })
   @IsString()

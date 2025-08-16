@@ -47,7 +47,7 @@ export class RegisterDto {
 
   @ApiProperty({ 
     description: 'Confirm password',
-    example: 'password123'
+    example: 'Password123'
   })
   @IsString()
   @IsNotEmpty()

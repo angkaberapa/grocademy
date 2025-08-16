@@ -23,7 +23,7 @@ export class Course {
   instructor: string;
 
   @ApiProperty({ description: 'Course price', example: 99.99 })
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', scale: 2 })
   price: number;
 
   @ApiProperty({ 
