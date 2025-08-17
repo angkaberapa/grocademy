@@ -32,7 +32,7 @@ export class Course {
     nullable: true 
   })
   @Column({ nullable: true })
-  thumbnail_image: string;
+  thumbnail_image: string | null;
 
   @ApiProperty({ description: 'Course creation timestamp' })
   @CreateDateColumn()
@@ -50,5 +50,5 @@ export class Course {
   userCourses: UserCourse[];
 
   @OneToMany(() => CourseTopic, courseTopic => courseTopic.course)
-  courseTopics: CourseTopic[];
+  topics: CourseTopic[];
 }

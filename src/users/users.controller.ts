@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query, HttpStatus, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { User } from './users.entity';
@@ -86,14 +86,14 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete user by ID' })
   @ApiParam({ name: 'id', description: 'User ID (UUID)' })
-  @ApiResponse({ status: 200, description: 'User deleted successfully' })
+  @ApiResponse({ status: 204, description: 'User deleted successfully' })
   @ApiResponse({ status: 404, description: 'User not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing token' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin role required or Admin can\'t be deleted' })
-  async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
+  async deleteUser(@Param('id') id: string): Promise<void> {
     await this.usersService.deleteUser(id);
-    return { message: 'User deleted successfully' };
   }
 }

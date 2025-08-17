@@ -17,7 +17,7 @@ export class CourseTopic {
   topic: string;
 
   // Relations
-  @ManyToOne(() => Course, course => course.courseTopics, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Course, course => course.topics, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'course_id' })
   course: Course;
 }
