@@ -4,6 +4,12 @@ import { Module } from '../module/module.entity';
 import { UserCourse } from '../user-courses/user-courses.entity';
 import { CourseTopic } from './course-topic.entity';
 
+const DecimalTransformer = {
+  to: (value: number): number => value,
+  from: (value: string): number => parseFloat(value)
+};
+
+
 @Entity('courses')
 export class Course {
   @ApiProperty({ description: 'Course unique identifier' })
@@ -23,7 +29,12 @@ export class Course {
   instructor: string;
 
   @ApiProperty({ description: 'Course price', example: 99.99 })
-  @Column({ type: 'decimal', scale: 2 })
+  @Column({ 
+    type: 'decimal', 
+    precision: 15, 
+    scale: 2,
+    transformer: DecimalTransformer
+  })
   price: number;
 
   @ApiProperty({ 

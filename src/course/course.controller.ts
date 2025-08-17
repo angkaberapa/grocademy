@@ -34,7 +34,7 @@ import {
 } from './dto';
 import { CreateCourseSwaggerDto, UpdateCourseSwaggerDto } from './dto/swagger.dto';
 
-@ApiTags('Courses')
+@ApiTags('courses')
 @Controller('courses')
 export class CourseController {
   constructor(

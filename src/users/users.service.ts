@@ -59,10 +59,6 @@ export class UsersService {
       throw new ConflictException('Username or email already exists');
     }
 
-    if (userData.password) {
-      userData.password = await bcrypt.hash(userData.password, 10);
-    }
-
     const user = this.usersRepository.create(userData);
     return this.usersRepository.save(user);
   }

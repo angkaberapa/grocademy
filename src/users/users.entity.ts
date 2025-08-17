@@ -3,6 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { UserCourse } from '../user-courses/user-courses.entity';
 import { UserModuleProgress } from '../user-module-progress/user-module-progress.entity';
 
+const DecimalTransformer = {
+  to: (value: number): number => value,
+  from: (value: string): number => parseFloat(value)
+};
+
 export enum UserRole {
   ADMIN = 'admin',
   USER = 'user',
@@ -35,7 +40,13 @@ export class User {
   last_name: string;
 
   @ApiProperty({ description: 'Account balance', example: 1000, default: 0 })
-  @Column({ default: 0 })
+  @Column({ 
+    type: 'decimal', 
+    precision: 15, 
+    scale: 2, 
+    default: 0,
+    transformer: DecimalTransformer
+  })
   balance: number;
 
   @ApiProperty({ description: 'User role', enum: UserRole, default: UserRole.USER })
