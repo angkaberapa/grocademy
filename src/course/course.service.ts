@@ -51,7 +51,7 @@ export class CourseService {
       description: createCourseDto.description,
       instructor: createCourseDto.instructor,
       price: createCourseDto.price,
-      thumbnail_image: thumbnailPath || null,
+      ...(thumbnailPath && { thumbnail_image: thumbnailPath }),
     });
 
     const savedCourse = await this.courseRepository.save(course);

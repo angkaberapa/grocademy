@@ -32,7 +32,7 @@ export class Course {
     nullable: true 
   })
   @Column({ nullable: true })
-  thumbnail_image: string | null;
+  thumbnail_image: string;
 
   @ApiProperty({ description: 'Course creation timestamp' })
   @CreateDateColumn()
