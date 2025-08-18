@@ -14,13 +14,17 @@ services:
 
   app:
     build: .
+    container_name: grocademy-app-prod
     ports:
       - "3000:3000"
     depends_on:
       - db
+    environment:
+      NODE_ENV: production
     volumes:
-      - .:/app
+      - uploads:/app/uploads  # Persistent uploads for production
     restart: unless-stopped
 
 volumes:
   dbdata:
+  uploads:  # Persistent volume for uploads

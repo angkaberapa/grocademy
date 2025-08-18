@@ -28,7 +28,7 @@ export class FileStorageService {
   }
 
   /**
-   * Save uploaded file and return the file path
+   * Save uploaded file and return the full URL
    */
   async saveFile(file: any, category: 'thumbnail' | 'pdf' | 'video'): Promise<string> {
     const timestamp = Date.now();
@@ -51,7 +51,10 @@ export class FileStorageService {
     
     try {
       await fs.writeFile(filePath, file.buffer);
-      return `/${filePath}`;
+      
+      // Return full URL instead of just path
+      const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+      return `${baseUrl}/${filePath}`;
     } catch (error) {
       this.logger.error(`Failed to save file ${filePath}:`, error);
       throw new Error('Failed to save file');
@@ -64,8 +67,17 @@ export class FileStorageService {
   async deleteFile(filePath: string): Promise<void> {
     if (!filePath) return;
 
-    // Remove leading slash if present
-    const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+    // Extract the actual file path from URL if it's a full URL
+    let cleanPath = filePath;
+    
+    // If it's a full URL (contains http), extract just the file path
+    if (filePath.includes('http')) {
+      const url = new URL(filePath);
+      cleanPath = url.pathname.startsWith('/') ? url.pathname.slice(1) : url.pathname;
+    } else {
+      // Remove leading slash if present
+      cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath;
+    }
     
     try {
       await fs.unlink(cleanPath);
