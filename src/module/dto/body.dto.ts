@@ -34,14 +34,20 @@ export class CreateUpdateModuleSwaggerDto {
 
 export class ModuleOrderDto {
   @ApiProperty({ description: 'Module ID', example: 'module-1' })
+  @IsString()
+  @IsNotEmpty()
   id: string;
 
   @ApiProperty({ description: 'Module order', example: 1 })
   @IsNumber()
+  @Min(1)
   order: number;
 }
 
 export class ReorderModuleBodyDto {
   @ApiProperty({type: [ModuleOrderDto], description: 'List of modules order'})
+  @IsArray()
+  @ArrayMinSize(1)
+  @Type(() => ModuleOrderDto)
   module_order: ModuleOrderDto[];
 }

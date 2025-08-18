@@ -11,5 +11,5 @@ export class BalanceIncrementBodyDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  amount: number;
+  increment: number;
 }

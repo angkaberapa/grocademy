@@ -61,7 +61,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() balanceDto: BalanceIncrementBodyDto
   ): Promise<UserBalanceResponseDto> {
-    return this.usersService.incrementBalance(id, balanceDto.amount);
+    return this.usersService.incrementBalance(id, balanceDto.increment);
   }
 
   @Put(':id')
