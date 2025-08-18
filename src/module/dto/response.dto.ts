@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsArray, IsNumber, Min, ArrayMinSize } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
-import { BaseResponseDto } from 'src/auth/dto/auth-response.dto';
-import Module from 'module';
-import { PaginationMetaDto } from 'src/users/dto';
+import { BaseResponseDto } from '../../auth/dto/auth-response.dto';
+import { PaginationMetaDto } from '../../users/dto';
 import { ReorderModuleBodyDto } from './body.dto';
 
 export class ModuleDataDto {
