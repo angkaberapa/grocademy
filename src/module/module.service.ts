@@ -5,6 +5,7 @@ import { Module } from './module.entity';
 import { UserModuleProgress } from '../user-module-progress/user-module-progress.entity';
 import { Course } from '../course/course.entity';
 import { UserCourse } from '../user-courses/user-courses.entity';
+import { User, UserRole } from '../users/users.entity';
 import { FileStorageService } from '../common/file-storage.service';
 import {
   CreateUpdateModuleBodyDto,
@@ -33,6 +34,8 @@ export class ModuleService {
     private courseRepository: Repository<Course>,
     @InjectRepository(UserCourse)
     private userCourseRepository: Repository<UserCourse>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private fileStorageService: FileStorageService,
   ) {}
 
@@ -96,15 +99,10 @@ export class ModuleService {
     userId: string,
     query: GetAllCoursesQueryDto,
   ): Promise<GetAllCourseModulesResponseDto> {
-    // Check if user has access to this course
-    const userCourse = await this.userCourseRepository.findOne({
-      where: {
-        user: { id: userId },
-        course: { id: courseId },
-      },
-    });
+    // Check if user has access to this course (admin or purchased)
+    const hasAccess = await this.checkCourseAccess(userId, courseId);
 
-    if (!userCourse) {
+    if (!hasAccess) {
       throw new ForbiddenException('Access denied. You must purchase this course to view its modules.');
     }
 
@@ -166,15 +164,10 @@ export class ModuleService {
       throw new NotFoundException('Module not found');
     }
 
-    // Check if user has access to this course
-    const userCourse = await this.userCourseRepository.findOne({
-      where: {
-        user: { id: userId },
-        course: { id: module.course_id },
-      },
-    });
+    // Check if user has access to this course (admin or purchased)
+    const hasAccess = await this.checkCourseAccess(userId, module.course_id);
 
-    if (!userCourse) {
+    if (!hasAccess) {
       throw new ForbiddenException('Access denied. You must purchase this course to view this module.');
     }
 
@@ -312,15 +305,10 @@ export class ModuleService {
       throw new NotFoundException('Module not found');
     }
 
-    // Check if user has access to this course
-    const userCourse = await this.userCourseRepository.findOne({
-      where: {
-        user: { id: userId },
-        course: { id: module.course_id },
-      },
-    });
+    // Check if user has access to this course (admin or purchased)
+    const hasAccess = await this.checkCourseAccess(userId, module.course_id);
 
-    if (!userCourse) {
+    if (!hasAccess) {
       throw new ForbiddenException('Access denied. You must purchase this course to complete this module.');
     }
 
@@ -382,6 +370,27 @@ export class ModuleService {
       message: 'Module completed successfully',
       data: responseData,
     };
+  }
+
+  private async checkCourseAccess(userId: string, courseId: string): Promise<boolean> {
+    // Check if user is admin
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (user && user.role === UserRole.ADMIN) {
+      return true; // Admin has access to all courses
+    }
+
+    // Check if user has purchased the course
+    const userCourse = await this.userCourseRepository.findOne({
+      where: {
+        user: { id: userId },
+        course: { id: courseId },
+      },
+    });
+
+    return !!userCourse; // Return true if user course exists
   }
 
   private formatModuleResponse(module: Module): ModuleDataDto {
