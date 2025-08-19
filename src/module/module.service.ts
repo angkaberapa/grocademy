@@ -7,6 +7,7 @@ import { Course } from '../course/course.entity';
 import { UserCourse } from '../user-courses/user-courses.entity';
 import { User, UserRole } from '../users/users.entity';
 import { FileStorageService } from '../common/file-storage.service';
+import { CertificateService } from '../common/certificate.service';
 import {
   CreateUpdateModuleBodyDto,
   ReorderModuleBodyDto,
@@ -37,6 +38,7 @@ export class ModuleService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private fileStorageService: FileStorageService,
+    private certificateService: CertificateService,
   ) {}
 
   async createModule(
@@ -371,8 +373,43 @@ export class ModuleService {
 
     const percentage = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
 
-    // TODO: Implement certificate pdf generation
-    const certificateUrl = percentage === 100 ? null : null;
+    // Generate certificate if course is 100% complete
+    let certificateUrl: string | null = null;
+    if (percentage === 100) {
+      try {
+        // Get user and course info
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        const course = await this.courseRepository.findOne({ where: { id: module.course_id } });
+
+        if (user && course) {
+          // Find the earliest completion date for this course
+          const firstCompletion = await this.userModuleProgressRepository.findOne({
+            where: {
+              user_id: userId,
+              module: { course_id: module.course_id },
+              is_completed: true,
+            },
+            order: { completed_at: 'ASC' },
+          });
+
+          // Use the completion date of the module that was just completed, or the earliest one
+          const completionDate = firstCompletion?.completed_at || new Date();
+
+          // Generate certificate
+          certificateUrl = await this.certificateService.generateCertificate({
+            username: user.username,
+            courseTitle: course.title,
+            instructor: course.instructor,
+            completionDate,
+            userId: user.id,
+            courseId: course.id,
+          });
+        }
+      } catch (error) {
+        // Log error but don't fail the entire operation
+        console.error('Failed to generate certificate:', error);
+      }
+    }
 
     const responseData: UserModuleCompletedDataDto = {
       module_id: moduleId,

@@ -67,6 +67,10 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
+  app.useStaticAssets(join(__dirname, '..', 'public'), {
+    prefix: '/public/',
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Grocademy API')
     .setDescription('Grocademy API documentation')

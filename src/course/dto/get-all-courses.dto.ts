@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional, IsNumberString } from 'class-validator';
 
 export class GetAllCoursesQueryDto {
+  // TODO: no need q in GET /api/courses/:courseId/modules
   @ApiPropertyOptional({ description: 'Search query for course title, topic, or instructor', example: 'TypeScript' })
   @IsOptional()
   @IsString()

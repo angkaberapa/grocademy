@@ -16,6 +16,7 @@ export class FileStorageService {
       'uploads/courses/thumbnails',
       'uploads/modules/pdfs',
       'uploads/modules/videos',
+      'uploads/certificates',
     ];
 
     for (const dir of directories) {

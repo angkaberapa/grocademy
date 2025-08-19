@@ -8,10 +8,11 @@ import { Course } from '../course/course.entity';
 import { UserCourse } from '../user-courses/user-courses.entity';
 import { User } from '../users/users.entity';
 import { FileStorageService } from '../common/file-storage.service';
+import { CertificateService } from '../common/certificate.service';
 
 @NestModule({
   imports: [TypeOrmModule.forFeature([Module, UserModuleProgress, Course, UserCourse, User])],
-  providers: [ModuleService, FileStorageService],
+  providers: [ModuleService, FileStorageService, CertificateService],
   controllers: [ModuleController],
   exports: [ModuleService],
 })

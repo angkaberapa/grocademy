@@ -12,7 +12,7 @@ RUN npm run build
 COPY src/views ./src/views
 
 # Create uploads directory structure
-RUN mkdir -p uploads/courses/thumbnails uploads/modules/pdfs uploads/modules/videos
+RUN mkdir -p uploads/courses/thumbnails uploads/modules/pdfs uploads/modules/videos uploads/certificates
 
 EXPOSE 3000
 
