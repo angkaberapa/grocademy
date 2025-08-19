@@ -94,21 +94,44 @@ export class FileStorageService {
     await Promise.all(filePaths.map(path => this.deleteFile(path)));
   }
 
+
+
   /**
-   * Delete all media files associated with a course
+   * Delete course thumbnail and all related module files
    */
-  async deleteCourseMedia(courseId: string): Promise<void> {
-    // This would typically query the database to find all associated files
-    // For now, this is a placeholder for the implementation
-    this.logger.log(`Cleaning up media files for course: ${courseId}`);
+  async deleteCourseMediaFiles(thumbnailPath: string | null, modulePaths: { pdf?: string, video?: string }[]): Promise<void> {
+    const filesToDelete: string[] = [];
+
+    // Add thumbnail if exists
+    if (thumbnailPath) {
+      filesToDelete.push(thumbnailPath);
+    }
+
+    // Add all module files
+    modulePaths.forEach(paths => {
+      if (paths.pdf) filesToDelete.push(paths.pdf);
+      if (paths.video) filesToDelete.push(paths.video);
+    });
+
+    // Delete all files
+    if (filesToDelete.length > 0) {
+      await this.deleteFiles(filesToDelete);
+      this.logger.log(`Deleted ${filesToDelete.length} media files for course`);
+    }
   }
 
   /**
-   * Delete all media files associated with a module
+   * Delete module media files (PDF and video)
    */
-  async deleteModuleMedia(moduleId: string): Promise<void> {
-    // This would typically query the database to find all associated files
-    // For now, this is a placeholder for the implementation
-    this.logger.log(`Cleaning up media files for module: ${moduleId}`);
+  async deleteModuleMediaFiles(pdfPath: string | null, videoPath: string | null): Promise<void> {
+    const filesToDelete: string[] = [];
+
+    if (pdfPath) filesToDelete.push(pdfPath);
+    if (videoPath) filesToDelete.push(videoPath);
+
+    if (filesToDelete.length > 0) {
+      await this.deleteFiles(filesToDelete);
+      this.logger.log(`Deleted ${filesToDelete.length} media files for module`);
+    }
   }
 }

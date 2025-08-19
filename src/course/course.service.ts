@@ -7,6 +7,7 @@ import { UserCourse } from '../user-courses/user-courses.entity';
 import { User } from '../users/users.entity';
 import { Module } from '../module/module.entity';
 import { UserModuleProgress } from '../user-module-progress/user-module-progress.entity';
+import { FileStorageService } from '../common/file-storage.service';
 import {
   CreateCourseBodyDto,
   CreateCourseResponseDto,
@@ -39,6 +40,7 @@ export class CourseService {
     private userModuleProgressRepository: Repository<UserModuleProgress>,
     @InjectRepository(Module)
     private moduleRepository: Repository<Module>,
+    private fileStorageService: FileStorageService,
   ) {}
 
   async create(
@@ -184,6 +186,9 @@ export class CourseService {
       throw new NotFoundException('Course not found');
     }
 
+    // Store old thumbnail path for cleanup if a new one is provided
+    const oldThumbnailPath = course.thumbnail_image;
+
     // Update course fields
     course.title = updateCourseDto.title;
     course.description = updateCourseDto.description;
@@ -192,6 +197,11 @@ export class CourseService {
     if(thumbnailPath !== undefined) course.thumbnail_image = thumbnailPath;
 
     await this.courseRepository.save(course);
+
+    // Clean up old thumbnail if a new one was uploaded
+    if (thumbnailPath && oldThumbnailPath && oldThumbnailPath !== thumbnailPath) {
+      await this.fileStorageService.deleteFile(oldThumbnailPath);
+    }
 
     // delete all old topics
     await this.courseTopicRepository.delete({ course_id: id });
@@ -228,13 +238,27 @@ export class CourseService {
   async delete(id: string): Promise<void> {
     const course = await this.courseRepository.findOne({
       where: { id },
+      relations: ['modules'],
     });
 
     if (!course) {
       throw new NotFoundException('Course not found');
     }
 
+    // Collect all media files to delete
+    const modulePaths = course.modules.map(module => ({
+      pdf: module.pdf_content,
+      video: module.video_content,
+    }));
+
+    // Delete the course (this will cascade delete modules due to onDelete: 'CASCADE')
     await this.courseRepository.remove(course);
+
+    // Clean up all media files after successful deletion
+    await this.fileStorageService.deleteCourseMediaFiles(
+      course.thumbnail_image,
+      modulePaths
+    );
   }
 
   async buyCourse(userId: string, courseId: string): Promise<BuyCourseResponseDto> {

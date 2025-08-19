@@ -205,6 +205,10 @@ export class ModuleService {
       throw new NotFoundException('Module not found');
     }
 
+    // Store old file paths for cleanup if new ones are provided
+    const oldPdfPath = module.pdf_content;
+    const oldVideoPath = module.video_content;
+
     // Handle file uploads
     let pdfPath: string | null = module.pdf_content;
     let videoPath: string | null = module.video_content;
@@ -224,6 +228,15 @@ export class ModuleService {
       pdf_content: pdfPath,
       video_content: videoPath,
     });
+
+    // Clean up old files if new ones were uploaded
+    if (pdfFile && oldPdfPath && oldPdfPath !== pdfPath) {
+      await this.fileStorageService.deleteFile(oldPdfPath);
+    }
+
+    if (videoFile && oldVideoPath && oldVideoPath !== videoPath) {
+      await this.fileStorageService.deleteFile(oldVideoPath);
+    }
 
     const updatedModule = await this.moduleRepository.findOne({
       where: { id: moduleId },
@@ -245,7 +258,14 @@ export class ModuleService {
       throw new NotFoundException('Module not found');
     }
 
+    // Delete the module from database
     await this.moduleRepository.delete(moduleId);
+
+    // Clean up associated media files
+    await this.fileStorageService.deleteModuleMediaFiles(
+      module.pdf_content,
+      module.video_content
+    );
   }
 
   async reorderModules(
