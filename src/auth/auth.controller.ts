@@ -1,4 +1,5 @@
-import { Controller, Post, Get, Body, UseGuards, Request, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, ValidationPipe, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -25,8 +26,26 @@ export class AuthController {
     description: 'Invalid credentials',
     type: LoginResponseDto
   })
-  async login(@Body(ValidationPipe) loginDto: LoginDto): Promise<LoginResponseDto> {
-    return this.authService.login(loginDto);
+  async login(
+    @Body(ValidationPipe) loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response
+  ) {
+    const result = await this.authService.login(loginDto);
+    
+    if (result.status === 'success' && result.data?.token) {
+      // Set HttpOnly cookie
+      response.cookie('auth-token', result.data.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 1000, // 1 hour
+        path: '/'
+      });
+      
+      return result;
+    }
+    
+    return result;
   }
 
   @Post('register')
@@ -67,5 +86,16 @@ export class AuthController {
   })
   async getProfile(@CurrentUserId() userId: string): Promise<UserProfileResponseDto> {
     return this.authService.getProfile(userId);
+  }
+
+  @Post('logout')
+  @ApiOperation({ summary: 'User logout' })
+  @ApiResponse({ status: 200, description: 'Logout successful' })
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('auth-token');
+    return {
+      status: 'success',
+      message: 'Logged out successfully'
+    };
   }
 }

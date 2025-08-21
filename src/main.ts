@@ -4,6 +4,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
+const expressLayouts = require('express-ejs-layouts');
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -44,6 +46,9 @@ async function bootstrap() {
     maxAge: 86400, // Cache preflight for 24 hours
   });
   
+  // Enable cookie parsing
+  app.use(cookieParser());
+  
   // Global validation pipe
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
@@ -56,11 +61,20 @@ async function bootstrap() {
       '/',
       '/hello',
       '/health',
+      '/login',
+      '/register',
+      '/browse-courses',
+      '/course/:id',
+      '/my-courses',
+      '/course/:courseId/modules',
+      '/course/:courseId/module/:moduleId'
     ],
   });
   
   app.setBaseViewsDir(join(__dirname, '..', 'src', 'views'));  
   app.setViewEngine('ejs');
+  app.use(expressLayouts);
+  app.set('layout', 'layout');
 
   // Serve static files
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {

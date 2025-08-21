@@ -1,18 +1,160 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, Render, Req, Param, Query, UseGuards, UnauthorizedException, Headers, Redirect } from '@nestjs/common';
 import { AppService } from './app.service';
+import { CourseService } from './course/course.service';
+import { ModuleService } from './module/module.service';
+import { UsersService } from './users/users.service';
+import { AuthService } from './auth/auth.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { User } from './users/users.entity';
 
 @ApiTags('grocademy')
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly courseService: CourseService,
+    private readonly moduleService: ModuleService,
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Get('/')
-  @Render('index')
-  @ApiOperation({ summary: 'Get home page' })
-  @ApiResponse({ status: 200, description: 'Returns the home page' })
+  @Redirect('/login', 302)
+  @ApiOperation({ summary: 'Redirect to login page' })
+  @ApiResponse({ status: 302, description: 'Redirects to login page' })
   home() {
-    return { name: 'Tuan Mik' };
+  }  
+  
+  @Get('/login')
+  @Render('login')
+  @ApiOperation({ summary: 'Get login page' })
+  @ApiResponse({ status: 200, description: 'Returns the login page' })
+  login() {
+    return {};
+  }
+
+  @Get('/register')
+  @Render('register')
+  @ApiOperation({ summary: 'Get register page' })
+  @ApiResponse({ status: 200, description: 'Returns the register page' })
+  register() {
+    return {};
+  }
+
+  @Get('/browse-courses')
+  @Render('browse-courses')
+  @ApiOperation({ summary: 'Get browse courses page' })
+  @ApiResponse({ status: 200, description: 'Returns the browse courses page' })
+  async browseCourses(@Query() query: any) {
+    try {
+      const page = query.page || '1';
+      const limit = query.limit || '6';
+      const search = query.search || '';
+
+      const coursesData = await this.courseService.findAll({
+        page,
+        limit,
+        q: search
+      });
+
+      return {
+        user: null, // Will be populated client-side
+        courses: coursesData.data || [],
+        currentPage: coursesData.pagination.current_page,
+        totalPages: coursesData.pagination.total_pages,
+        totalCourses: coursesData.pagination.total_items,
+        limit: parseInt(limit),
+        searchQuery: search
+      };
+    } catch (error) {
+      return {
+        user: null,
+        courses: [],
+        currentPage: 1,
+        totalPages: 0,
+        totalCourses: 0,
+        limit: 6,
+        searchQuery: ''
+      };
+    }
+  }
+
+  @Get('/course/:id')
+  @Render('course-detail')
+  @ApiOperation({ summary: 'Get course detail page' })
+  @ApiResponse({ status: 200, description: 'Returns the course detail page' })
+  async courseDetail(@Param('id') courseId: string) {
+    // Render page without user data - client will fetch via API if needed
+    try {
+      const courseData = await this.courseService.findById(courseId);
+      
+      return {
+        user: null, // Will be populated client-side
+        course: courseData.data
+      };
+    } catch (error) {
+      return {
+        user: null,
+        course: null,
+        error: 'Course not found'
+      };
+    }
+  }
+
+  @Get('/my-courses')
+  @Render('my-courses')
+  @ApiOperation({ summary: 'Get my courses page' })
+  @ApiResponse({ status: 200, description: 'Returns the my courses page' })
+  async myCourses() {
+    // Render empty page - client will fetch data via API with bearer token
+    return {
+      user: null,
+      purchasedCourses: [],
+      currentPage: 1,
+      totalPages: 0,
+      totalCourses: 0,
+      limit: 12,
+      searchQuery: ''
+    };
+  }
+
+  @Get('/course/:courseId/modules')
+  @Render('course-modules')
+  @ApiOperation({ summary: 'Get course modules page' })
+  @ApiResponse({ status: 200, description: 'Returns the course modules page' })
+  async courseModules(@Param('courseId') courseId: string) {
+    // Render empty page - client will fetch data via API with bearer token
+    return {
+      user: null,
+      course: null,
+      modules: [],
+      totalModules: 0,
+      completedModules: 0,
+      progressPercent: 0
+    };
+  }
+
+  @Get('/course/:courseId/module/:moduleId')
+  @Render('module-viewer')
+  @ApiOperation({ summary: 'Get module viewer page' })
+  @ApiResponse({ status: 200, description: 'Returns the module viewer page' })
+  async moduleViewer(
+    @Param('courseId') courseId: string,
+    @Param('moduleId') moduleId: string
+  ) {
+    // Render empty page - client will fetch data via API with bearer token
+    return {
+      user: null,
+      course: null,
+      module: null,
+      modules: [],
+      currentModuleIndex: -1,
+      hasNext: false,
+      hasPrevious: false,
+      nextModule: null,
+      previousModule: null
+    };
   }
 
   @Get('/hello')

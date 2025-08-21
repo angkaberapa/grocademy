@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocademy</title>
+    <link rel="stylesheet" href="/public/styles.css">
+    <link rel="icon" href="/public/logo.webp" type="image/webp">
+    <script src="/public/auth.js"></script>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo-section">
+                <img src="/public/logo.webp" alt="Grocademy Logo" class="logo">
+                <span class="logo-text">Grocademy</span>
+            </div>
+            
+            <div class="nav-links">
+                
+                <div id="authenticated-nav" style="display: none;">
+                    <div class="user-menu">
+                        <a href="/browse-courses">Browse Courses</a>
+                        <a href="/my-courses">My Courses</a>
+                        <span class="user-name" id="user-name"></span>
+                        <span class="user-balance" id="user-balance"></span>
+                        <a href="#" onclick="logout()" class="logout-btn">Logout</a>
+                    </div>
+                </div>
+                
+                <div id="unauthenticated-nav" style="display: none;">
+                    <div class="user-menu">
+                        <a href="/login">Login</a>
+                        <a href="/register">Register</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="alert alert-<%= messageType || 'info' %>">
+                <%= message %>
+            </div>
+        <% } %>
+        
+        <%- body %>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Grocademy. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function logout() {
+            Auth.logout();
+        }
+    </script>
+</body>
+</html>
