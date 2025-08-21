@@ -1,0 +1,345 @@
+<div class="page-container">
+    <div class="page-header">
+        <h1>My Courses</h1>
+        <p>Continue your learning journey</p>
+    </div>
+
+    <div class="search-section">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search your courses by name or instructor...">
+            <button onclick="searchCourses()" class="btn-secondary">Search</button>
+        </div>
+        
+        <div class="filter-controls">
+            <select id="limitSelect" onchange="changeLimit()">
+                <option value="6">6 per page</option>
+                <option value="12" selected>12 per page</option>
+                <option value="24">24 per page</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loadingState" class="loading">
+        <p>Loading your courses...</p>
+    </div>
+
+    <!-- Courses container - populated by JavaScript -->
+    <div id="coursesContainer" style="display: none;">
+        <!-- Content will be injected here -->
+    </div>
+
+    <!-- Pagination containers - populated by JavaScript -->
+    <div class="pagination" style="display: none;"></div>
+    <div class="pagination-info" style="display: none;"></div>
+</div>
+
+<style>
+.my-course-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.my-course-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.progress-section {
+    margin: 15px 0;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.completed-badge {
+    background-color: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin-top: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.no-courses {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.no-courses h3 {
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.no-courses p {
+    margin-bottom: 24px;
+}
+</style>
+
+<script>
+// Initialize with URL parameters or defaults
+const urlParams = new URLSearchParams(window.location.search);
+let currentPage = parseInt(urlParams.get('page')) || 1;
+let searchQuery = urlParams.get('q') || '';
+let limit = parseInt(urlParams.get('limit')) || 12;
+
+// Set initial form values
+document.getElementById('searchInput').value = searchQuery;
+document.getElementById('limitSelect').value = limit;
+
+function searchCourses() {
+    const input = document.getElementById('searchInput');
+    searchQuery = input.value;
+    currentPage = 1;
+    loadCourses();
+}
+
+function changeLimit() {
+    const select = document.getElementById('limitSelect');
+    limit = parseInt(select.value);
+    currentPage = 1;
+    loadCourses();
+}
+
+function changePage(page) {
+    currentPage = page;
+    loadCourses();
+}
+
+async function loadCourses() {
+    try {
+        // Show loading, hide content
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('coursesContainer').style.display = 'none';
+        
+        const params = new URLSearchParams({
+            q: searchQuery,
+            page: currentPage,
+            limit: limit,
+        });
+        
+        const response = await fetch(`/api/courses/my-courses?${params}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Auth.getToken()}`
+            }
+        });
+        const result = await response.json();
+        
+        // Hide loading
+        document.getElementById('loadingState').style.display = 'none';
+        
+        if (response.ok && result.status === 'success') {
+            // Update the courses container with new data
+            updateCoursesContainer(result.data || []);
+            
+            // Update pagination if available
+            if (result.pagination) {
+                updatePagination(result.pagination);
+            }
+            
+            // Update URL without page reload
+            const newUrl = `/my-courses?${params}`;
+            window.history.pushState({}, '', newUrl);
+            
+            // Show content
+            document.getElementById('coursesContainer').style.display = 'block';
+        } else {
+            console.error('Error:', result.message);
+            updateCoursesContainer([]);
+            document.getElementById('coursesContainer').style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error loading courses:', error);
+        document.getElementById('loadingState').style.display = 'none';
+        updateCoursesContainer([]);
+        document.getElementById('coursesContainer').style.display = 'block';
+    }
+}
+
+function updateCoursesContainer(courses) {
+    const container = document.getElementById('coursesContainer');
+    
+    if (courses.length === 0) {
+        container.innerHTML = `
+            <div class="no-courses">
+                <h3>No courses purchased yet</h3>
+                <p>Start your learning journey by browsing our amazing courses</p>
+                <a href="/browse-courses" class="btn-primary">Browse Courses</a>
+            </div>
+        `;
+        return;
+    }
+    
+    const coursesHTML = courses.map(course => {
+        const progress = course.progress_percentage || 0;
+        const isCompleted = progress === 100;
+        
+        return `
+            <div class="my-course-card">
+                <div class="course-content">
+                    <h3 class="course-title">${escapeHtml(course.title)}</h3>
+                    <p class="course-instructor">Instructor: ${escapeHtml(course.instructor)}</p>
+                    
+                    <div class="progress-section">
+                        <div class="progress-label">
+                            <span>Progress: ${Math.round(progress)}%</span>
+                            ${isCompleted ? '<span class="completed-badge">Completed</span>' : ''}
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="course-actions">
+                    <a href="/course/${course.id}/modules" class="btn-primary">
+                        ${progress === 0 ? 'Start Course' : 
+                          isCompleted ? 'Review Course' : 'Continue Learning'}
+                    </a>
+                    
+                    ${isCompleted ? `
+                        <button onclick="downloadCertificate()" class="btn-success">
+                            Download Certificate
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = `<div class="courses-grid">${coursesHTML}</div>`;
+}
+
+async function downloadCertificate() {
+    try {
+        const response = await fetch(`/api/courses/${courseId}/certificate`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Auth.getToken()}`
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.status === 'success') {
+            // Open certificate in new tab
+            window.open(result.data.certificate_url, '_blank');
+        } else {
+            alert(result.message || 'Failed to get certificate');
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+function updatePagination(pagination) {
+    const { current_page, total_pages, total_items } = pagination;
+    
+    // Update global variables
+    currentPage = current_page;
+    
+    // Find pagination elements
+    const paginationContainer = document.querySelector('.pagination');
+    const paginationInfo = document.querySelector('.pagination-info');
+    
+    if (total_pages <= 1) {
+        // Hide pagination if not needed
+        if (paginationContainer) paginationContainer.style.display = 'none';
+        if (paginationInfo) paginationInfo.style.display = 'none';
+        return;
+    }
+    
+    // Show and update pagination
+    if (paginationContainer) {
+        paginationContainer.style.display = 'flex';
+        
+        let paginationHTML = '';
+        
+        // Previous button
+        if (current_page > 1) {
+            paginationHTML += `<button onclick="changePage(${current_page - 1})" class="pagination-btn">Previous</button>`;
+        }
+        
+        // Page numbers
+        for (let i = 1; i <= total_pages; i++) {
+            const activeClass = i === current_page ? 'active' : '';
+            paginationHTML += `<button onclick="changePage(${i})" class="pagination-btn ${activeClass}">${i}</button>`;
+        }
+        
+        // Next button
+        if (current_page < total_pages) {
+            paginationHTML += `<button onclick="changePage(${current_page + 1})" class="pagination-btn">Next</button>`;
+        }
+        
+        paginationContainer.innerHTML = paginationHTML;
+    }
+    
+    // Update pagination info
+    if (paginationInfo) {
+        paginationInfo.style.display = 'block';
+        const startItem = ((current_page - 1) * limit) + 1;
+        const endItem = Math.min(current_page * limit, total_items);
+        paginationInfo.innerHTML = `Showing ${startItem} - ${endItem} of ${total_items} courses`;
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Event listeners
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchCourses();
+    }
+});
+
+// Load courses on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadCourses();
+});
+</script>

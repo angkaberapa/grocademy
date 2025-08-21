@@ -7,6 +7,7 @@ import { AuthService } from './auth/auth.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { User } from './users/users.entity';
+import { UserCoursesService } from './user-courses/user-courses.service';
 
 @ApiTags('grocademy')
 @Controller()
@@ -14,6 +15,7 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly courseService: CourseService,
+    private readonly userCourseRepository: UserCoursesService,
     private readonly moduleService: ModuleService,
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
@@ -59,7 +61,6 @@ export class AppController {
       });
 
       return {
-        user: null, // Will be populated client-side
         courses: coursesData.data || [],
         currentPage: coursesData.pagination.current_page,
         totalPages: coursesData.pagination.total_pages,
@@ -69,7 +70,6 @@ export class AppController {
       };
     } catch (error) {
       return {
-        user: null,
         courses: [],
         currentPage: 1,
         totalPages: 0,
@@ -85,21 +85,7 @@ export class AppController {
   @ApiOperation({ summary: 'Get course detail page' })
   @ApiResponse({ status: 200, description: 'Returns the course detail page' })
   async courseDetail(@Param('id') courseId: string) {
-    // Render page without user data - client will fetch via API if needed
-    try {
-      const courseData = await this.courseService.findById(courseId);
-      
-      return {
-        user: null, // Will be populated client-side
-        course: courseData.data
-      };
-    } catch (error) {
-      return {
-        user: null,
-        course: null,
-        error: 'Course not found'
-      };
-    }
+    return {};
   }
 
   @Get('/my-courses')
@@ -108,15 +94,7 @@ export class AppController {
   @ApiResponse({ status: 200, description: 'Returns the my courses page' })
   async myCourses() {
     // Render empty page - client will fetch data via API with bearer token
-    return {
-      user: null,
-      purchasedCourses: [],
-      currentPage: 1,
-      totalPages: 0,
-      totalCourses: 0,
-      limit: 12,
-      searchQuery: ''
-    };
+    return {};
   }
 
   @Get('/course/:courseId/modules')

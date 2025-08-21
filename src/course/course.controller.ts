@@ -20,6 +20,7 @@ import { AdminGuard } from '../auth/admin.guard';
 import { CurrentUserId } from '../auth/current-user.decorator';
 import { CourseService } from './course.service';
 import { FileStorageService } from '../common/file-storage.service';
+import { UserCoursesService } from '../user-courses/user-courses.service';
 import {
   CreateCourseBodyDto,
   CreateCourseResponseDto,
@@ -40,6 +41,7 @@ export class CourseController {
   constructor(
     private readonly courseService: CourseService,
     private readonly fileStorageService: FileStorageService,
+    private readonly userCoursesService: UserCoursesService,
   ) {}
 
   @Post()
@@ -151,5 +153,65 @@ export class CourseController {
     @CurrentUserId() userId: string,
   ): Promise<BuyCourseResponseDto> {
     return this.courseService.buyCourse(userId, courseId);
+  }
+
+  @Get(':id/buy-status')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check if user owns a course' })
+  @ApiResponse({ status: 200, description: 'Buy status retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Course not found' })
+  async getBuyStatus(
+    @Param('id') courseId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    const buyStatus = await this.userCoursesService.buyStatus(courseId, userId);
+    return {
+      status: 'success',
+      message: 'Buy status retrieved successfully',
+      data: buyStatus
+    };
+  }
+
+  @Get(':id/certificate')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get course certificate if completed' })
+  @ApiResponse({ status: 200, description: 'Certificate URL retrieved successfully' })
+  @ApiResponse({ status: 400, description: 'Course not completed' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Course not found or not purchased' })
+  async getCourseCertificate(
+    @Param('id') courseId: string,
+    @CurrentUserId() userId: string,
+  ) {
+    const buyStatus = await this.userCoursesService.buyStatus(courseId, userId);
+    
+    if (!buyStatus.owns_course) {
+      return {
+        status: 'error',
+        message: 'Course not purchased'
+      };
+    }
+    
+    if (!buyStatus.is_completed) {
+      return {
+        status: 'error',
+        message: 'Course not completed. Complete all modules to get certificate.'
+      };
+    }
+    
+    // Find certificate from completed modules (certificates are generated when completing modules)
+    const certificateUrl = `/uploads/certificates/certificate-${userId}-${courseId}.pdf`;
+    
+    return {
+      status: 'success',
+      message: 'Certificate URL retrieved successfully',
+      data: {
+        certificate_url: certificateUrl,
+        progress_percentage: buyStatus.progress_percentage
+      }
+    };
   }
 }
