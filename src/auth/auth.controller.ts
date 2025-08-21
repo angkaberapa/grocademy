@@ -32,19 +32,6 @@ export class AuthController {
   ) {
     const result = await this.authService.login(loginDto);
     
-    if (result.status === 'success' && result.data?.token) {
-      // Set HttpOnly cookie
-      response.cookie('auth-token', result.data.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 60 * 60 * 1000, // 1 hour
-        path: '/'
-      });
-      
-      return result;
-    }
-    
     return result;
   }
 
@@ -91,8 +78,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({ status: 200, description: 'Logout successful' })
-  async logout(@Res({ passthrough: true }) response: Response) {
-    response.clearCookie('auth-token');
+  async logout() {
     return {
       status: 'success',
       message: 'Logged out successfully'

@@ -4,7 +4,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-import cookieParser from 'cookie-parser';
 const expressLayouts = require('express-ejs-layouts');
 
 async function bootstrap() {
@@ -45,9 +44,6 @@ async function bootstrap() {
     credentials: true, // Allow cookies/auth headers
     maxAge: 86400, // Cache preflight for 24 hours
   });
-  
-  // Enable cookie parsing
-  app.use(cookieParser());
   
   // Global validation pipe
   app.useGlobalPipes(new ValidationPipe({

@@ -1,15 +1,37 @@
-// HttpOnly cookie authentication
+// Authorization Bearer token authentication
 class Auth {
     
+    static getToken() {
+        return localStorage.getItem('auth-token');
+    }
+    
+    static setToken(token) {
+        localStorage.setItem('auth-token', token);
+    }
+    
+    static removeToken() {
+        localStorage.removeItem('auth-token');
+    }
+    
     static async getCurrentUser() {
+        const token = this.getToken();
+        
+        if (!token) {
+            return null;
+        }
+        
         try {
             const response = await fetch('/api/auth/self', {
-                credentials: 'include' 
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
             
             if (response.ok) {
                 return await response.json();
             } else if (response.status === 401) {
+                this.removeToken(); // Clear invalid token
                 return null;
             } else {
                 throw new Error(`Request failed: ${response.status}`);
@@ -21,14 +43,20 @@ class Auth {
     }
 
     static async logout() {
+        const token = this.getToken();
+        
         try {
             await fetch('/api/auth/logout', {
                 method: 'POST',
-                credentials: 'include'
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`
+                } : {}
             });
         } catch (error) {
             console.error('Logout error:', error);
         }
+        
+        this.removeToken();
         window.location.href = '/login';
     }
 

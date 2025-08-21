@@ -47,9 +47,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         
         const result = await response.json();
         
-        if (response.ok) {
-            localStorage.setItem('token', result.access_token);
-            localStorage.setItem('user', JSON.stringify(result.user));
+        if (response.ok && result.status === 'success' && result.data?.token) {
+            // Store token using Auth class
+            Auth.setToken(result.data.token);
             window.location.href = '/browse-courses';
         } else {
             alert(result.message || 'Login failed');
