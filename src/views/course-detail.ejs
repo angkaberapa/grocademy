@@ -1,0 +1,334 @@
+<div class="page-container">
+    <!-- Loading state -->
+    <div id="loadingState" class="loading">
+        <p>Loading course details...</p>
+    </div>
+
+    <!-- Course detail container - populated by JavaScript -->
+    <div id="courseDetailContainer" style="display: none;">
+        <!-- Content will be injected here -->
+    </div>
+
+    <div class="navigation">
+        <a href="/browse-courses" class="btn-secondary">Back to Browse</a>
+    </div>
+</div>
+
+<style>
+.progress-section {
+    margin: 15px 0;
+}
+
+.progress-text {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background-color: #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+    border-radius: 6px;
+    transition: width 0.3s ease;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-success:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+</style>
+
+<script>
+let currentUser = null;
+let currentCourse = null;
+let userOwnsThisCourse = false;
+let progressPercentage = 0;
+let isCompleted = false;
+
+// Get course ID from URL
+const urlParts = window.location.pathname.split('/');
+const courseId = urlParts[urlParts.indexOf('course') + 1];
+
+async function loadCourseDetail() {
+    try {
+        // Show loading, hide content
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('courseDetailContainer').style.display = 'none';
+        
+        const token = Auth.getToken();
+        
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+        
+        // Load user and course data in parallel
+        const [userResponse, courseResponse, buyStatusResponse] = await Promise.all([
+            fetch('/api/auth/self', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }),
+            fetch(`/api/courses/${courseId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }),
+            fetch(`/api/courses/${courseId}/buy-status`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+        ]);
+        
+        // Hide loading
+        document.getElementById('loadingState').style.display = 'none';
+        
+        // Parse responses
+        const userResult = await userResponse.json();
+        const courseResult = await courseResponse.json();
+        const buyStatusResult = await buyStatusResponse.json();
+        
+        if (courseResponse.ok && courseResult.status === 'success') {
+            currentCourse = courseResult.data;
+        } else {
+            showError('Course not found');
+            return;
+        }
+        
+        if (userResponse.ok && userResult.status === 'success') {
+            currentUser = userResult.data;
+        } else {
+            showError('Please login to view course details');
+            return;
+        }
+        
+        // Check if user owns this course
+        userOwnsThisCourse = buyStatusResponse.ok && buyStatusResult.status === 'success' && buyStatusResult.data?.owns_course;
+        
+        if (userOwnsThisCourse && buyStatusResult.data) {
+            progressPercentage = buyStatusResult.data.progress_percentage || 0;
+            isCompleted = buyStatusResult.data.is_completed || false;
+        }
+        
+        // Update the course detail container
+        updateCourseDetailContainer();
+        
+        // Show content
+        document.getElementById('courseDetailContainer').style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error loading course detail:', error);
+        document.getElementById('loadingState').style.display = 'none';
+        showError('Failed to load course details');
+    }
+}
+
+function updateCourseDetailContainer() {
+    const container = document.getElementById('courseDetailContainer');
+    
+    if (!currentCourse || !currentUser) {
+        showError('Failed to load course details');
+        return;
+    }
+    
+    container.innerHTML = `
+        <div class="course-detail">
+            <div class="course-header">
+                <h1>${escapeHtml(currentCourse.title)}</h1>
+                <p class="instructor">Taught by ${escapeHtml(currentCourse.instructor)}</p>
+            </div>
+
+            <div class="course-content">
+                <div class="course-info">
+                    <div class="description-section">
+                        <h3>Course Description</h3>
+                        <p>${escapeHtml(currentCourse.description)}</p>
+                    </div>
+
+                    <div class="topics-section">
+                        <h3></h3>
+                        <h3>Related Topics</h3>
+                        <ul class="topics-list">
+                            ${currentCourse.topics ? currentCourse.topics.map(topic => 
+                                `<li>${escapeHtml(topic)}</li>`
+                            ).join('') : '<li>No topics listed</li>'}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="purchase-card">
+                    <div class="price-section">
+                        <div class="price">$${currentCourse.price}</div>
+                    </div>
+
+                    <div class="purchase-actions">
+                        ${generatePurchaseActions()}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function generatePurchaseActions() {
+    if (userOwnsThisCourse) {
+        let actionsHTML = `
+            <div class="purchased-status">
+                <span class="purchased-badge">Course Purchased</span>
+            </div>
+        `;
+        
+        // Show progress if course is owned
+        if (progressPercentage >= 0) {
+            actionsHTML += `
+                <div class="progress-section">
+                    <p class="progress-text">Progress: ${progressPercentage}%</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        actionsHTML += `
+            <a href="/course/${currentCourse.id}/modules" class="btn-primary">
+                Continue Learning
+            </a>
+        `;
+        
+        // Show certificate download if course is completed
+        if (isCompleted) {
+            actionsHTML += `
+                <button onclick="downloadCertificate()" class="btn-success">
+                    Download Certificate
+                </button>
+            `;
+        }
+        
+        return actionsHTML;
+    } else {
+        // User doesn't own the course
+        const hasEnoughBalance = currentUser.balance >= currentCourse.price;
+        
+        if (hasEnoughBalance) {
+            return `
+                <button onclick="purchaseCourse()" class="btn-primary">
+                    Buy Now
+                </button>
+                <p class="balance-info">Your balance: $${currentUser.balance}</p>
+            `;
+        } else {
+            const shortfall = currentCourse.price - currentUser.balance;
+            return `
+                <button class="btn-secondary" disabled>
+                    Insufficient Balance
+                </button>
+                <p class="insufficient-balance">
+                    Need $${shortfall.toFixed(2)} more
+                </p>
+                <p class="balance-info">Your balance: $${currentUser.balance}</p>
+            `;
+        }
+    }
+}
+
+async function purchaseCourse() {
+    const token = Auth.getToken();
+    
+    if (!token) {
+        alert('Please login first');
+        window.location.href = '/login';
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/courses/${courseId}/buy`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('Course purchased successfully!');
+            // Reload the page to update the purchase status
+            window.location.reload();
+        } else {
+            alert(result.message || 'Purchase failed');
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+async function downloadCertificate() {
+    try {
+        const response = await fetch(`/api/courses/${courseId}/certificate`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Auth.getToken()}`
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.status === 'success') {
+            // Open certificate in new tab
+            window.open(result.data.certificate_url, '_blank');
+        } else {
+            alert(result.message || 'Failed to get certificate');
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+function showError(message) {
+    const container = document.getElementById('courseDetailContainer');
+    container.innerHTML = `
+        <div class="error-message">
+            <h3>Error</h3>
+            <p>${escapeHtml(message)}</p>
+            <a href="/browse-courses" class="btn-secondary">Back to Browse</a>
+        </div>
+    `;
+    container.style.display = 'block';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Load course on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadCourseDetail();
+});
+</script>

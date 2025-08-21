@@ -2,12 +2,18 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserCourse } from './user-courses.entity';
+import { Module } from '../module/module.entity';
+import { UserModuleProgress } from '../user-module-progress/user-module-progress.entity';
 
 @Injectable()
 export class UserCoursesService {
   constructor(
     @InjectRepository(UserCourse)
     private userCoursesRepository: Repository<UserCourse>,
+    @InjectRepository(Module)
+    private moduleRepository: Repository<Module>,
+    @InjectRepository(UserModuleProgress)
+    private userModuleProgressRepository: Repository<UserModuleProgress>,
   ) {}
 
   async findAll(): Promise<UserCourse[]> {
@@ -53,6 +59,51 @@ export class UserCoursesService {
     const userCourse = await this.findOne(transactionId);
     userCourse.completed_at = new Date();
     return this.userCoursesRepository.save(userCourse);
+  }
+
+  async buyStatus(courseId: string, userId: string): Promise<{ 
+    owns_course: boolean; 
+    transaction_id?: string; 
+    progress_percentage?: number;
+    is_completed?: boolean;
+  }> {
+    const userCourse = await this.userCoursesRepository.findOne({
+      where: { 
+        user_id: userId,
+        course_id: courseId 
+      },
+    });
+    
+    if (!userCourse) {
+      return { owns_course: false };
+    }
+
+    // Calculate progress if user owns the course
+    const [totalModules, completedModules] = await Promise.all([
+      this.moduleRepository.count({
+        where: { course_id: courseId }
+      }),
+      this.userModuleProgressRepository.count({
+        where: { 
+          user_id: userId,
+          module: { course_id: courseId },
+          is_completed: true
+        }
+      })
+    ]);
+
+    const progressPercentage = totalModules > 0 
+      ? Math.round((completedModules / totalModules) * 100) 
+      : 0;
+
+    const isCompleted = progressPercentage === 100;
+    
+    return {
+      owns_course: true,
+      transaction_id: userCourse.transaction_id,
+      progress_percentage: progressPercentage,
+      is_completed: isCompleted
+    };
   }
 
   async remove(transactionId: string): Promise<void> {

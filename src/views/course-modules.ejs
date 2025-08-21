@@ -1,0 +1,677 @@
+<div class="page-container">
+    <div class="course-modules">
+        <!-- Loading state -->
+        <div id="loadingState" class="loading">
+            <p>Loading course modules...</p>
+        </div>
+
+        <!-- Course content will be populated by JavaScript -->
+        <div id="courseContent" style="display: none;">
+            <!-- Content will be injected here -->
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" style="display: none;">
+            <p class="error">Error loading course. Please try again.</p>
+            <a href="/my-courses" class="btn-secondary">Back to My Courses</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.course-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.progress-overview {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 15px 0;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
+
+.modules-container {
+    margin-bottom: 30px;
+}
+
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    gap: 15px;
+}
+
+.modules-list {
+    margin-bottom: 20px;
+}
+
+.module-accordion {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.module-accordion:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.module-accordion.completed {
+    border-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.module-header {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s ease;
+}
+
+.module-header:hover {
+    background: #e9ecef;
+}
+
+.module-accordion.completed .module-header {
+    background: #d4edda;
+}
+
+.module-header.active {
+    background: #e3f2fd;
+}
+
+.module-title-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.module-number {
+    background: #007bff;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.module-accordion.completed .module-number {
+    background: #28a745;
+}
+
+.module-info h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+
+.module-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+.module-type {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.module-type.video {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.module-type.document {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.completed-badge {
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.module-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.expand-icon {
+    transition: transform 0.3s ease;
+    color: #666;
+}
+
+.expand-icon.expanded {
+    transform: rotate(180deg);
+}
+
+.module-content {
+    display: none;
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: white;
+}
+
+.module-content.expanded {
+    display: block;
+}
+
+.module-description {
+    margin-bottom: 20px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.module-viewer {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.video-player {
+    width: 100%;
+    max-height: 400px;
+}
+
+.pdf-viewer {
+    width: 100%;
+    height: 500px;
+    border: none;
+}
+
+.module-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.completion-card {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 30px 0;
+    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+}
+
+.completion-card h3 {
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.completion-card p {
+    margin-bottom: 20px;
+    opacity: 0.9;
+}
+
+.btn-success {
+    background-color: #fff;
+    color: #28a745;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 14px;
+}
+
+.no-modules {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+</style>
+
+<script>
+// Pagination state
+let currentPage = 1;
+let totalPages = 1;
+let modulesPerPage = 15; // Default from API
+let courseData = null;
+let courseId = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Ensure user is authenticated
+        const token = Auth.getToken();
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        const loadingState = document.getElementById('loadingState');
+        const courseContent = document.getElementById('courseContent');
+        const errorState = document.getElementById('errorState');
+
+        // Get course ID from URL
+        const urlParts = window.location.pathname.split('/');
+        courseId = urlParts[2]; // /course/:courseId/modules
+
+        if (!courseId) {
+            throw new Error('Course ID not found');
+        }
+
+        // Load initial page
+        await loadModules();
+
+    } catch (error) {
+        console.error('Error loading course modules:', error);
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+    }
+});
+
+async function loadModules() {
+    try {
+        const loadingState = document.getElementById('loadingState');
+        const courseContent = document.getElementById('courseContent');
+        
+        // Show loading
+        loadingState.style.display = 'block';
+        courseContent.style.display = 'none';
+
+        const token = Auth.getToken();
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        // Fetch course info and modules in parallel
+        const [courseResponse, modulesResponse] = await Promise.all([
+            fetch(`/api/courses/${courseId}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }),
+            fetch(`/api/courses/${courseId}/modules?page=${currentPage}&limit=${modulesPerPage}`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+        ]);
+
+        if (!courseResponse.ok || !modulesResponse.ok) {
+            if (courseResponse.status === 401 || modulesResponse.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            throw new Error(`Request failed`);
+        }
+
+        const courseResult = await courseResponse.json();
+        const modulesResult = await modulesResponse.json();
+        
+        // Hide loading state
+        loadingState.style.display = 'none';
+
+        if (courseResult && courseResult.data && modulesResult && modulesResult.data) {
+            courseData = {
+                course: courseResult.data,
+                modules: modulesResult.data,
+                pagination: modulesResult.pagination
+            };
+            
+            totalPages = modulesResult.pagination.total_pages;
+            
+            // Show course content
+            courseContent.style.display = 'block';
+            updateContent();
+        } else {
+            throw new Error('No course data received');
+        }
+
+    } catch (error) {
+        console.error('Error loading modules:', error);
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('errorState').style.display = 'block';
+    }
+}
+
+function updateContent() {
+    const courseContent = document.getElementById('courseContent');
+    courseContent.innerHTML = generateCourseHTML();
+}
+
+function generateCourseHTML() {
+    if (!courseData) return '';
+
+    const { course, modules, pagination } = courseData;
+    const totalModules = pagination.total_items;
+    const completedModules = modules.filter(module => module.is_completed).length;
+    const progressPercent = totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+
+    const modulesHTML = modules.map((module, index) => {
+        const moduleIndex = ((currentPage - 1) * modulesPerPage) + index + 1;
+        const isCompleted = module.is_completed;
+        
+        // Determine module type based on content availability
+        let moduleTypeLabel = [];
+        if (module.video_content) moduleTypeLabel.push('Video');
+        if (module.pdf_content) moduleTypeLabel.push('Document');
+        if (moduleTypeLabel.length === 0) moduleTypeLabel.push('Content');
+        
+        return `
+            <div class="module-accordion ${isCompleted ? 'completed' : ''}" id="module-${module.id}">
+                <div class="module-header" onclick="toggleModule('${module.id}')">
+                    <div class="module-title-section">
+                        <div class="module-number">${module.order}</div>
+                        <div class="module-info">
+                            <h4>${escapeHtml(module.title)}</h4>
+                            <div class="module-meta">
+                                ${isCompleted ? '<span class="completed-badge">Completed</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="module-actions">
+                        <span class="expand-icon">▼</span>
+                    </div>
+                </div>
+                
+                <div class="module-content" id="content-${module.id}">
+                    ${module.description ? `<div class="module-description">${escapeHtml(module.description)}</div>` : ''}
+                    
+                    <div class="module-viewer">
+                        ${generateModuleViewer(module)}
+                    </div>
+                    
+                    <div class="module-footer">
+                        <div class="module-progress">
+                            ${isCompleted ? 
+                                '<span style="color: #28a745; font-weight: 500;">✓ Completed</span>' : 
+                                '<span style="color: #ffc107; font-weight: 500;">In Progress</span>'
+                            }
+                        </div>
+                        <div class="module-actions">
+                            <a href="/course/${courseId}/module/${module.id}" class="btn-primary">
+                                ${isCompleted ? 'Review' : 'Open Full View'}
+                            </a>
+                            ${!isCompleted ? `
+                                <button onclick="markComplete('${module.id}')" class="btn-success">
+                                    Mark Complete
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <div class="course-header">
+            <h1>${escapeHtml(course.title)}</h1>
+            <p>Instructor: ${escapeHtml(course.instructor)}</p>
+            <p>Course Modules</p>
+        </div>
+
+        <div class="progress-overview">
+            <h3>Progress: ${completedModules}/${totalModules} modules completed</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                <div class="progress-text">${progressPercent}% Complete</div>
+            </div>
+        </div>
+
+        <div class="modules-container">
+            ${totalModules > 0 ? `
+                <div class="modules-list">
+                    ${modulesHTML}
+                </div>
+
+                <div class="pagination-controls">
+                    <button onclick="changePage(${currentPage - 1})" 
+                            class="btn-secondary" 
+                            ${currentPage <= 1 ? 'disabled' : ''}>
+                        Previous
+                    </button>
+                    <div class="pagination-info">
+                        Page ${pagination.current_page} of ${pagination.total_pages}
+                    </div>
+                    <button onclick="changePage(${currentPage + 1})" 
+                            class="btn-secondary" 
+                            ${currentPage >= totalPages ? 'disabled' : ''}>
+                        Next
+                    </button>
+                </div>
+            ` : `
+                <div class="no-modules">
+                    <h3>No modules available</h3>
+                    <p>This course doesn't have any modules yet.</p>
+                </div>
+            `}
+        </div>
+
+        ${progressPercent === 100 ? `
+            <div class="completion-card">
+                <p>You've completed all modules in this course!</p>
+                <button onclick="downloadCertificate()" class="btn-success">
+                    Download Your Certificate
+                </button>
+            </div>
+        ` : ''}
+
+        <div class="navigation">
+            <a href="/my-courses" class="btn-secondary">Back to My Courses</a>
+            <a href="/course/${courseId}" class="btn-secondary">Course Details</a>
+        </div>
+    `;
+}
+
+function generateModuleViewer(module, moduleType, fileUrl) {
+    let content = '';
+    
+    // Check for video content
+    if (module.video_content) {
+        const videoUrl = module.video_content;
+        const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+        
+        if (isYouTube) {
+            // Convert YouTube URL to embed format
+            let videoId = '';
+            if (videoUrl.includes('youtube.com/watch?v=')) {
+                videoId = videoUrl.split('v=')[1].split('&')[0];
+            } else if (videoUrl.includes('youtu.be/')) {
+                videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+            }
+            
+            content += `
+                <div class="content-section">
+                    <iframe class="video-player" 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            `;
+        } else {
+            // Regular video file
+            content += `
+                <div class="content-section">
+                    <video class="video-player" controls>
+                        <source src="${videoUrl}" type="video/mp4">
+                        Your browser does not support the video tag.
+                        <a href="${videoUrl}" target="_blank">Open video in new tab</a>
+                    </video>
+                </div>
+            `;
+        }
+    }
+    
+    // Check for PDF content
+    if (module.pdf_content) {
+        const pdfUrl = module.pdf_content;
+        content += `
+            <div class="content-section" ${module.video_content ? 'style="margin-top: 20px;"' : ''}>
+                <iframe class="pdf-viewer" 
+                        src="${pdfUrl}" 
+                        type="application/pdf">
+                    <p>Your browser does not support PDFs. 
+                       <a href="${pdfUrl}" target="_blank">Download the PDF</a>
+                    </p>
+                </iframe>
+            </div>
+        `;
+    }
+    
+    // If no content available
+    if (!content) {
+        return `
+            <div style="padding: 20px; text-align: center; color: #666; background: #f8f9fa; border-radius: 4px;">
+                <h3>Content not available</h3>
+                <p>This module doesn't have content available yet.</p>
+                ${fileUrl ? `<a href="${fileUrl}" target="_blank" class="btn-primary">Open in New Tab</a>` : ''}
+            </div>
+        `;
+    }
+    
+    return content;
+}
+
+function toggleModule(moduleId) {
+    const moduleContent = document.getElementById(`content-${moduleId}`);
+    const expandIcon = document.querySelector(`#module-${moduleId} .expand-icon`);
+    const moduleHeader = document.querySelector(`#module-${moduleId} .module-header`);
+    
+    if (moduleContent.classList.contains('expanded')) {
+        moduleContent.classList.remove('expanded');
+        expandIcon.classList.remove('expanded');
+        moduleHeader.classList.remove('active');
+    } else {
+        // Close all other modules
+        document.querySelectorAll('.module-content.expanded').forEach(content => {
+            content.classList.remove('expanded');
+        });
+        document.querySelectorAll('.expand-icon.expanded').forEach(icon => {
+            icon.classList.remove('expanded');
+        });
+        document.querySelectorAll('.module-header.active').forEach(header => {
+            header.classList.remove('active');
+        });
+        
+        // Open this module
+        moduleContent.classList.add('expanded');
+        expandIcon.classList.add('expanded');
+        moduleHeader.classList.add('active');
+    }
+}
+
+function changePage(newPage) {
+    if (newPage < 1 || newPage > totalPages) return;
+    currentPage = newPage;
+    loadModules(); // Reload modules for the new page
+}
+
+async function markComplete(moduleId) {
+    try {
+        const response = await fetch(`/api/modules/${moduleId}/complete`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${Auth.getToken()}`
+            }
+        });
+        
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = '/login';
+                return;
+            }
+            throw new Error(`Request failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+        alert('Module marked as complete!');
+        window.location.reload();
+    } catch (error) {
+        alert('Failed to mark module as complete. Please try again.');
+        console.error('Error marking module complete:', error);
+    }
+}
+
+async function downloadCertificate() {
+    try {
+        const response = await fetch(`/api/courses/${courseId}/certificate`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Auth.getToken()}`
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.status === 'success') {
+            // Open certificate in new tab
+            window.open(result.data.certificate_url, '_blank');
+        } else {
+            alert(result.message || 'Failed to get certificate');
+        }
+    } catch (error) {
+        alert('Network error. Please try again.');
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
