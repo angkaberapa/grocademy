@@ -23,6 +23,8 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/grocademy
+      SEED_DATABASE: "true"
     volumes:
       - .:/app
       - /app/node_modules

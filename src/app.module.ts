@@ -13,6 +13,7 @@ import { ModuleModule } from './module/module.module';
 import { UserCoursesModule } from './user-courses/user-courses.module';
 import { UserModuleProgressModule } from './user-module-progress/user-module-progress.module';
 import { AuthModule } from './auth/auth.module';
+import { SeedModule } from './seeds/seed.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigService, ConfigModule } from '@nestjs/config';
@@ -39,6 +40,7 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
     UserCoursesModule,
     UserModuleProgressModule,
     AuthModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [AppService],

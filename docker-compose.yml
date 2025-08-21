@@ -21,6 +21,8 @@ services:
       - db
     environment:
       NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/grocademy
+      SEED_DATABASE: "true"  # Set to "false" after first run in production
     volumes:
       - uploads:/app/uploads  # Persistent uploads for production
     restart: unless-stopped
