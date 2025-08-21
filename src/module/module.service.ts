@@ -22,7 +22,7 @@ import {
   UserModuleProgressDataDto,
   UserModuleCompletedDataDto,
 } from './dto/response.dto';
-import { GetAllCoursesQueryDto } from '../course/dto';
+import { GetAllCourseModulesQueryDto } from '../course/dto';
 
 @Injectable()
 export class ModuleService {
@@ -99,7 +99,7 @@ export class ModuleService {
   async getAllCourseModules(
     courseId: string,
     userId: string,
-    query: GetAllCoursesQueryDto,
+    query: GetAllCourseModulesQueryDto,
   ): Promise<GetAllCourseModulesResponseDto> {
     // Check if user has access to this course (admin or purchased)
     const hasAccess = await this.checkCourseAccess(userId, courseId);

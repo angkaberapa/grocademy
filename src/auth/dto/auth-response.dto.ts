@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export abstract class BaseResponseDto {
-  @ApiProperty({ description: 'Response status', example: 'success' })
-  status: string;
-  
-  @ApiProperty({ description: 'Response message', example: 'Login successful' })
-  message: string;
-}
+import { BaseResponseDto } from '../../common/dto/response.dto';
 
 export class LoginResponseDataDto {
   @ApiProperty({ description: 'Username', example: 'john_doe' })

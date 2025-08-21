@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsArray, IsNumber, Min, ArrayMinSize } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { CreateCourseDataDto } from './create-course.dto';
+import { BaseResponseDto } from 'src/common/dto/response.dto';
 
 export class UpdateCourseBodyDto {
   @ApiPropertyOptional({ description: 'Course title', example: 'Advanced TypeScript' })
@@ -43,13 +44,7 @@ export class UpdateCourseBodyDto {
   price: number;
 }
 
-export class UpdateCourseResponseDto {
-  @ApiProperty({ description: 'Response status', example: 'success' })
-  status: string;
-
-  @ApiProperty({ description: 'Response message', example: 'Course updated successfully' })
-  message: string;
-
+export class UpdateCourseResponseDto extends BaseResponseDto {
   @ApiProperty({ type: CreateCourseDataDto, nullable: true })
   data: CreateCourseDataDto | null;
 }

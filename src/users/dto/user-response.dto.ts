@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BaseResponseDto } from 'src/auth/dto/auth-response.dto';
+import { BaseResponseDto } from 'src/common/dto/response.dto';
 
 export class UserDto {
   @ApiProperty({ example: 'uuid-string-here' })

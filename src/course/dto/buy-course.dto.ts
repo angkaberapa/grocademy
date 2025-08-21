@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseResponseDto } from 'src/common/dto/response.dto';
 
 export class BuyCourseDataDto {
   @ApiProperty({ description: 'Purchased course ID', example: 'uuid-string' })
@@ -11,13 +12,7 @@ export class BuyCourseDataDto {
   transaction_id: string;
 }
 
-export class BuyCourseResponseDto {
-  @ApiProperty({ description: 'Response status', example: 'success' })
-  status: string;
-
-  @ApiProperty({ description: 'Response message', example: 'Course purchased successfully' })
-  message: string;
-
+export class BuyCourseResponseDto extends BaseResponseDto {
   @ApiProperty({ type: BuyCourseDataDto, nullable: true })
   data: BuyCourseDataDto | null;
 }

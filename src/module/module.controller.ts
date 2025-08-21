@@ -41,9 +41,9 @@ import {
   ReorderModuleResponseDto,
   CompleteModuleResponseDto,
 } from './dto/response.dto';
-import { GetAllCoursesQueryDto } from '../course/dto';
+import { GetAllCourseModulesQueryDto } from '../course/dto';
 
-@ApiTags('modules')
+@ApiTags('Modulesodules')
 @Controller()
 export class ModuleController {
   constructor(private readonly moduleService: ModuleService) {}
@@ -93,7 +93,7 @@ export class ModuleController {
   async getAllCourseModules(
     @Param('courseId') courseId: string,
     @CurrentUserId() userId: string,
-    @Query() query: GetAllCoursesQueryDto,
+    @Query() query: GetAllCourseModulesQueryDto,
   ): Promise<GetAllCourseModulesResponseDto> {
     return this.moduleService.getAllCourseModules(courseId, userId, query);
   }
