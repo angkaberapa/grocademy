@@ -93,7 +93,6 @@ export class AppController {
   @ApiOperation({ summary: 'Get my courses page' })
   @ApiResponse({ status: 200, description: 'Returns the my courses page' })
   async myCourses() {
-    // Render empty page - client will fetch data via API with bearer token
     return {};
   }
 
@@ -102,7 +101,6 @@ export class AppController {
   @ApiOperation({ summary: 'Get course modules page' })
   @ApiResponse({ status: 200, description: 'Returns the course modules page' })
   async courseModules(@Param('courseId') courseId: string) {
-    // Render empty page - client will fetch data via API with bearer token
     return {
       user: null,
       course: null,
@@ -121,7 +119,6 @@ export class AppController {
     @Param('courseId') courseId: string,
     @Param('moduleId') moduleId: string
   ) {
-    // Render empty page - client will fetch data via API with bearer token
     return {
       user: null,
       course: null,

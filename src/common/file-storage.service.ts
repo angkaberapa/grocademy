@@ -1,14 +1,43 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import { R2StorageService } from './r2-storage.service';
 
 @Injectable()
 export class FileStorageService {
   private readonly logger = new Logger(FileStorageService.name);
   private readonly uploadDir = 'uploads';
+  private readonly useR2: boolean;
+  private r2StorageService: R2StorageService | null = null;
 
   constructor() {
-    this.ensureUploadDirectories();
+    // Check if R2 is configured
+    this.useR2 = this.isR2Configured();
+    
+    if (this.useR2) {
+      try {
+        this.r2StorageService = new R2StorageService();
+        this.logger.log('Using Cloudflare R2 for file storage');
+      } catch (error) {
+        this.logger.warn('Failed to initialize R2 storage, falling back to local storage', error.message);
+        this.useR2 = false;
+      }
+    }
+
+    if (!this.useR2) {
+      this.logger.log('Using local file storage');
+      this.ensureUploadDirectories();
+    }
+  }
+
+  private isR2Configured(): boolean {
+    return !!(
+      process.env.R2_ACCESS_KEY_ID &&
+      process.env.R2_SECRET_ACCESS_KEY &&
+      process.env.R2_BUCKET_NAME &&
+      process.env.R2_ENDPOINT &&
+      process.env.R2_PUBLIC_URL
+    );
   }
 
   private async ensureUploadDirectories() {
@@ -48,6 +77,18 @@ export class FileStorageService {
         break;
     }
 
+    if (this.useR2 && this.r2StorageService) {
+      // Use R2 storage
+      const key = `${subDir}/${filename}`;
+      try {
+        return await this.r2StorageService.uploadFile(file, key);
+      } catch (error) {
+        this.logger.error('Failed to upload to R2, falling back to local storage', error);
+        // Fall back to local storage on error
+      }
+    }
+
+    // Use local storage (fallback or default)
     const filePath = join(this.uploadDir, subDir, filename);
     
     try {
@@ -68,7 +109,17 @@ export class FileStorageService {
   async deleteFile(filePath: string): Promise<void> {
     if (!filePath) return;
 
-    // Extract the actual file path from URL if it's a full URL
+    if (this.useR2 && this.r2StorageService && this.isR2Url(filePath)) {
+      // Delete from R2
+      try {
+        await this.r2StorageService.deleteFile(filePath);
+        return;
+      } catch (error) {
+        this.logger.warn('Failed to delete from R2', error.message);
+      }
+    }
+
+    // Delete from local storage
     let cleanPath = filePath;
     
     // If it's a full URL (contains http), extract just the file path
@@ -89,13 +140,19 @@ export class FileStorageService {
   }
 
   /**
+   * Check if a URL is an R2 URL
+   */
+  private isR2Url(url: string): boolean {
+    if (!process.env.R2_PUBLIC_URL) return false;
+    return url.includes(process.env.R2_PUBLIC_URL) || url.includes('.r2.dev') || url.includes('.r2.cloudflarestorage.com');
+  }
+
+  /**
    * Delete multiple files
    */
   async deleteFiles(filePaths: string[]): Promise<void> {
     await Promise.all(filePaths.map(path => this.deleteFile(path)));
   }
-
-
 
   /**
    * Delete course thumbnail and all related module files
@@ -134,5 +191,17 @@ export class FileStorageService {
       await this.deleteFiles(filesToDelete);
       this.logger.log(`Deleted ${filesToDelete.length} media files for module`);
     }
+  }
+
+  /**
+   * Test storage connection
+   */
+  async testConnection(): Promise<{ storage: string; status: boolean }> {
+    if (this.useR2 && this.r2StorageService) {
+      const status = await this.r2StorageService.testConnection();
+      return { storage: 'R2', status };
+    }
+    
+    return { storage: 'Local', status: true };
   }
 }

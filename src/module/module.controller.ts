@@ -43,7 +43,7 @@ import {
 } from './dto/response.dto';
 import { GetAllCourseModulesQueryDto } from '../course/dto';
 
-@ApiTags('Modulesodules')
+@ApiTags('modules')
 @Controller()
 export class ModuleController {
   constructor(private readonly moduleService: ModuleService) {}
