@@ -203,7 +203,7 @@ export class CourseController {
     }
     
     // Find certificate from completed modules (certificates are generated when completing modules)
-    const certificateUrl = `/uploads/certificates/certificate-${userId}-${courseId}.pdf`;
+    const certificateUrl = `${process.env.R2_PUBLIC_URL}/certificates/certificate-${userId}-${courseId}.pdf`;
     
     return {
       status: 'success',
