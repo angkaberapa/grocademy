@@ -70,6 +70,31 @@
     gap: 15px;
 }
 
+.pagination-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.pagination-per-page {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+    justify-content: center;
+}
+
+.pagination-per-page select {
+    padding: 5px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
 .modules-list {
     margin-bottom: 20px;
 }
@@ -478,20 +503,34 @@ function generateCourseHTML() {
                     ${modulesHTML}
                 </div>
 
-                <div class="pagination-controls">
-                    <button onclick="changePage(${currentPage - 1})" 
-                            class="btn-secondary" 
-                            ${currentPage <= 1 ? 'disabled' : ''}>
-                        Previous
-                    </button>
-                    <div class="pagination-info">
-                        Page ${pagination.current_page} of ${pagination.total_pages}
+                <div class="pagination-wrapper">
+                    <div class="pagination-per-page">
+                        <label for="modulesPerPageSelect">Show:</label>
+                        <select id="modulesPerPageSelect" onchange="changeModulesPerPage(this.value)">
+                            <option value="5" ${modulesPerPage === 5 ? 'selected' : ''}>5 per page</option>
+                            <option value="10" ${modulesPerPage === 10 ? 'selected' : ''}>10 per page</option>
+                            <option value="15" ${modulesPerPage === 15 ? 'selected' : ''}>15 per page</option>
+                            <option value="25" ${modulesPerPage === 25 ? 'selected' : ''}>25 per page</option>
+                            <option value="50" ${modulesPerPage === 50 ? 'selected' : ''}>50 per page</option>
+                        </select>
                     </div>
-                    <button onclick="changePage(${currentPage + 1})" 
-                            class="btn-secondary" 
-                            ${currentPage >= totalPages ? 'disabled' : ''}>
-                        Next
-                    </button>
+                    
+                    <div class="pagination-controls">
+                        <button onclick="changePage(${currentPage - 1})" 
+                                class="btn-secondary" 
+                                ${currentPage <= 1 ? 'disabled' : ''}>
+                            Previous
+                        </button>
+                        <div class="pagination-info">
+                            Page ${pagination.current_page} of ${pagination.total_pages} 
+                            (${((pagination.current_page - 1) * modulesPerPage) + 1}-${Math.min(pagination.current_page * modulesPerPage, pagination.total_items)} of ${pagination.total_items} modules)
+                        </div>
+                        <button onclick="changePage(${currentPage + 1})" 
+                                class="btn-secondary" 
+                                ${currentPage >= totalPages ? 'disabled' : ''}>
+                            Next
+                        </button>
+                    </div>
                 </div>
             ` : `
                 <div class="no-modules">
@@ -619,6 +658,20 @@ function changePage(newPage) {
     if (newPage < 1 || newPage > totalPages) return;
     currentPage = newPage;
     loadModules(); // Reload modules for the new page
+}
+
+function changeModulesPerPage(newLimit) {
+    const newModulesPerPage = parseInt(newLimit, 10);
+    if (newModulesPerPage === modulesPerPage) return;
+    
+    // Calculate what the new page should be to keep the user roughly in the same position
+    const currentFirstItem = ((currentPage - 1) * modulesPerPage) + 1;
+    const newPage = Math.ceil(currentFirstItem / newModulesPerPage);
+    
+    modulesPerPage = newModulesPerPage;
+    currentPage = Math.max(1, newPage);
+    
+    loadModules(); // Reload modules with new page size
 }
 
 async function markComplete(moduleId) {
