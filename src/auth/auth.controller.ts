@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request, ValidationPipe, Res } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, ValidationPipe, Res, Headers } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -28,9 +28,15 @@ export class AuthController {
   })
   async login(
     @Body(ValidationPipe) loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response
+    @Res({ passthrough: true }) response: Response,
+    @Headers('origin') origin: string,
+    @Headers('referer') referer: string,
   ) {
-    const result = await this.authService.login(loginDto);
+    // Check if the request is coming from the admin frontend
+    const adminDomain = 'https://labpro-ohl-2025-fe.hmif.dev';
+    const isAdminRequest = !!(origin === adminDomain || (referer && referer.startsWith(adminDomain)));
+    
+    const result = await this.authService.login(loginDto, isAdminRequest);
     
     return result;
   }
