@@ -3,27 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grocademy</title>
+    <meta name="description" content="Grocademy - Your premier online learning platform. Discover amazing courses and expand your knowledge with expert instructors. Learn at your own pace with interactive content.">
+    <meta name="keywords" content="online learning, courses, education, skill development, e-learning">
+    <meta name="author" content="Grocademy">
+    <title><%= typeof title !== 'undefined' ? title + ' - Grocademy' : 'Grocademy - Online Learning Platform' %></title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/public/styles.css" as="style">
+    <link rel="preload" href="/public/auth.js" as="script">
+    
+    <!-- Critical CSS inline -->
+    <style>
+        body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+        .header { background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .main-content { min-height: calc(100vh - 140px); }
+    </style>
+    
     <link rel="stylesheet" href="/public/styles.css">
     <link rel="icon" href="/public/logo.webp" type="image/webp">
-    <script src="/public/auth.js"></script>
+    <link rel="apple-touch-icon" href="/public/logo.png">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<%= typeof title !== 'undefined' ? title + ' - Grocademy' : 'Grocademy - Online Learning Platform' %>">
+    <meta property="og:description" content="Your premier online learning platform. Discover amazing courses and expand your knowledge.">
+    <meta property="og:image" content="/public/logo.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="<%= typeof title !== 'undefined' ? title + ' - Grocademy' : 'Grocademy - Online Learning Platform' %>">
+    <meta property="twitter:description" content="Your premier online learning platform. Discover amazing courses and expand your knowledge.">
+    
+    <script src="/public/auth.js" defer></script>
 </head>
 <body>
-    <header class="header">
-        <nav class="nav-container">
+    <header class="header" role="banner">
+        <nav class="nav-container" role="navigation" aria-label="Main navigation">
             <div class="logo-section">
-                <img src="/public/logo.webp" alt="Grocademy Logo" class="logo">
+                <img src="/public/logo.webp" alt="Grocademy Logo" class="logo" width="40" height="40">
                 <span class="logo-text">Grocademy</span>
             </div>
             
             <div class="nav-links">
-                
                 <div id="authenticated-nav" style="display: none;">
                     <div class="user-menu">
                         <a href="/browse-courses">Browse Courses</a>
                         <a href="/my-courses">My Courses</a>
-                        <span class="user-name" id="user-name"></span>
-                        <span class="user-balance" id="user-balance"></span>
+                        <span class="user-name" id="user-name" aria-label="Current user"></span>
+                        <span class="user-balance" id="user-balance" aria-label="Account balance"></span>
                         <a href="#" onclick="logout()" class="logout-btn">Logout</a>
                     </div>
                 </div>
@@ -38,9 +65,9 @@
         </nav>
     </header>
 
-    <main class="main-content">
+    <main class="main-content" role="main" id="main-content">
         <% if (typeof message !== 'undefined' && message) { %>
-            <div class="alert alert-<%= messageType || 'info' %>">
+            <div class="alert alert-<%= messageType || 'info' %>" role="alert">
                 <%= message %>
             </div>
         <% } %>
@@ -48,7 +75,7 @@
         <%- body %>
     </main>
 
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="footer-content">
             <p>&copy; 2024 Grocademy. All rights reserved.</p>
         </div>
@@ -58,6 +85,13 @@
         function logout() {
             Auth.logout();
         }
+        
+        // Skip to main content for accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab' && e.target.tagName === 'BODY') {
+                document.getElementById('main-content').focus();
+            }
+        });
     </script>
 </body>
 </html>

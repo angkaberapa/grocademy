@@ -1,6 +1,6 @@
 <div class="page-container">
     <!-- Loading state -->
-    <div id="loadingState" class="loading">
+    <div id="loadingState" class="loading" aria-live="polite">
         <p>Loading course details...</p>
     </div>
 
@@ -9,26 +9,160 @@
         <!-- Content will be injected here -->
     </div>
 
-    <div class="navigation">
+    <nav class="navigation" role="navigation" aria-label="Page navigation">
         <a href="/browse-courses" class="btn-secondary">Back to Browse</a>
-    </div>
+    </nav>
 </div>
 
 <style>
+/* Critical CSS - inline for performance */
+.page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.course-detail {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.course-hero {
+    position: relative;
+    height: 300px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 30px;
+}
+
+.course-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8));
+    z-index: 1;
+}
+
+.course-hero-content {
+    position: relative;
+    z-index: 2;
+    color: white;
+    flex: 1;
+}
+
+.course-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    line-height: 1.2;
+}
+
+.course-instructor {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.course-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+    padding: 40px;
+}
+
+.course-info h2 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.course-info h3 {
+    color: #444;
+    font-size: 1.25rem;
+    margin: 30px 0 15px 0;
+    font-weight: 600;
+}
+
+.description-section p {
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.topics-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.topics-list li {
+    background: #f0f4f8;
+    color: #2d3748;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.purchase-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 30px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+}
+
+.price-section {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 10px;
+}
+
 .progress-section {
-    margin: 15px 0;
+    margin: 20px 0;
 }
 
 .progress-text {
     margin-bottom: 8px;
-    font-weight: 500;
-    color: #333;
+    font-weight: 600;
+    color: #4a5568;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .progress-bar {
     width: 100%;
     height: 12px;
-    background-color: #e0e0e0;
+    background-color: #e2e8f0;
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: 15px;
@@ -36,31 +170,149 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+    background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
     border-radius: 6px;
     transition: width 0.3s ease;
 }
 
-.btn-success {
-    background-color: #28a745;
+.purchased-badge {
+    background: #48bb78;
     color: white;
-    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+.btn-primary, .btn-secondary, .btn-success {
+    display: inline-block;
     padding: 12px 24px;
-    border-radius: 6px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+    border: none;
     cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
     width: 100%;
-    transition: background-color 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.btn-primary {
+    background: #4299e1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3182ce;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #718096;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4a5568;
+}
+
+.btn-success {
+    background: #48bb78;
+    color: white;
 }
 
 .btn-success:hover {
-    background-color: #218838;
+    background: #38a169;
+    transform: translateY(-1px);
 }
 
-.btn-success:disabled {
-    background-color: #6c757d;
+.btn-success:disabled,
+.btn-secondary:disabled {
+    background: #a0aec0;
     cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.balance-info {
+    text-align: center;
+    color: #4a5568;
+    font-size: 0.875rem;
+    margin-top: 10px;
+}
+
+.insufficient-balance {
+    text-align: center;
+    color: #e53e3e;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.error-message {
+    background: #fed7d7;
+    border: 1px solid #feb2b2;
+    color: #c53030;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.navigation {
+    margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .course-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .course-hero {
+        height: 200px;
+        padding: 20px;
+    }
+    
+    .course-hero h1 {
+        font-size: 1.75rem;
+    }
+    
+    .purchase-card {
+        position: static;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for accessibility */
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-success:focus {
+    outline: 2px solid #4299e1;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .course-hero::before {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .topics-list li {
+        border: 1px solid #000;
+    }
 }
 </style>
 
@@ -78,8 +330,11 @@ const courseId = urlParts[urlParts.indexOf('course') + 1];
 async function loadCourseDetail() {
     try {
         // Show loading, hide content
-        document.getElementById('loadingState').style.display = 'block';
-        document.getElementById('courseDetailContainer').style.display = 'none';
+        const loadingEl = document.getElementById('loadingState');
+        const containerEl = document.getElementById('courseDetailContainer');
+        
+        loadingEl.style.display = 'block';
+        containerEl.style.display = 'none';
         
         const token = Auth.getToken();
         
@@ -105,7 +360,7 @@ async function loadCourseDetail() {
         ]);
         
         // Hide loading
-        document.getElementById('loadingState').style.display = 'none';
+        loadingEl.style.display = 'none';
         
         // Parse responses
         const userResult = await userResponse.json();
@@ -134,16 +389,35 @@ async function loadCourseDetail() {
             isCompleted = buyStatusResult.data.is_completed || false;
         }
         
+        // Update page title and meta description
+        updatePageMeta();
+        
         // Update the course detail container
         updateCourseDetailContainer();
         
         // Show content
-        document.getElementById('courseDetailContainer').style.display = 'block';
+        containerEl.style.display = 'block';
         
     } catch (error) {
         console.error('Error loading course detail:', error);
         document.getElementById('loadingState').style.display = 'none';
         showError('Failed to load course details');
+    }
+}
+
+function updatePageMeta() {
+    if (currentCourse) {
+        // Update page title
+        document.title = `${currentCourse.title} - Grocademy`;
+        
+        // Add meta description if it doesn't exist
+        let metaDesc = document.querySelector('meta[name="description"]');
+        if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.setAttribute('name', 'description');
+            document.head.appendChild(metaDesc);
+        }
+        metaDesc.setAttribute('content', `${currentCourse.description.substring(0, 155)}... - Course by ${currentCourse.instructor} on Grocademy`);
     }
 }
 
@@ -155,42 +429,51 @@ function updateCourseDetailContainer() {
         return;
     }
     
+    // Create background image URL with fallback
+    const backgroundImage = currentCourse.thumbnail_image 
+        ? `url('${currentCourse.thumbnail_image}')`
+        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    
     container.innerHTML = `
-        <div class="course-detail">
-            <div class="course-header">
-                <h1>${escapeHtml(currentCourse.title)}</h1>
-                <p class="instructor">Taught by ${escapeHtml(currentCourse.instructor)}</p>
-            </div>
+        <article class="course-detail">
+            <header class="course-hero" style="background-image: ${backgroundImage}">
+                <div class="course-hero-content">
+                    <h1>${escapeHtml(currentCourse.title)}</h1>
+                    <p class="course-instructor">Taught by ${escapeHtml(currentCourse.instructor)}</p>
+                </div>
+            </header>
 
             <div class="course-content">
                 <div class="course-info">
-                    <div class="description-section">
-                        <h3>Course Description</h3>
+                    <section class="description-section">
+                        <h2>Course Description</h2>
                         <p>${escapeHtml(currentCourse.description)}</p>
-                    </div>
+                    </section>
 
-                    <div class="topics-section">
-                        <h3></h3>
-                        <h3>Related Topics</h3>
-                        <ul class="topics-list">
-                            ${currentCourse.topics ? currentCourse.topics.map(topic => 
-                                `<li>${escapeHtml(topic)}</li>`
-                            ).join('') : '<li>No topics listed</li>'}
+                    <section class="topics-section">
+                        <h3>What You'll Learn</h3>
+                        <ul class="topics-list" role="list">
+                            ${currentCourse.topics && currentCourse.topics.length > 0 
+                                ? currentCourse.topics.map(topic => 
+                                    `<li>${escapeHtml(topic)}</li>`
+                                ).join('') 
+                                : '<li>Comprehensive course content</li>'
+                            }
                         </ul>
-                    </div>
+                    </section>
                 </div>
 
-                <div class="purchase-card">
+                <aside class="purchase-card" role="complementary">
                     <div class="price-section">
-                        <div class="price">$${currentCourse.price}</div>
+                        <div class="price" aria-label="Course price">$${currentCourse.price}</div>
                     </div>
 
                     <div class="purchase-actions">
                         ${generatePurchaseActions()}
                     </div>
-                </div>
+                </aside>
             </div>
-        </div>
+        </article>
     `;
 }
 
@@ -198,7 +481,7 @@ function generatePurchaseActions() {
     if (userOwnsThisCourse) {
         let actionsHTML = `
             <div class="purchased-status">
-                <span class="purchased-badge">Course Purchased</span>
+                <span class="purchased-badge" role="status">Course Purchased</span>
             </div>
         `;
         
@@ -206,8 +489,11 @@ function generatePurchaseActions() {
         if (progressPercentage >= 0) {
             actionsHTML += `
                 <div class="progress-section">
-                    <p class="progress-text">Progress: ${progressPercentage}%</p>
-                    <div class="progress-bar">
+                    <div class="progress-text" aria-label="Course progress">
+                        <span>Progress: ${Math.round(progressPercentage)}%</span>
+                        ${progressPercentage === 100 ? '<span aria-label="Course completed">✓</span>' : ''}
+                    </div>
+                    <div class="progress-bar" role="progressbar" aria-valuenow="${progressPercentage}" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-fill" style="width: ${progressPercentage}%"></div>
                     </div>
                 </div>
@@ -215,7 +501,7 @@ function generatePurchaseActions() {
         }
         
         actionsHTML += `
-            <a href="/course/${currentCourse.id}/modules" class="btn-primary">
+            <a href="/course/${currentCourse.id}/modules" class="btn-primary" aria-label="Continue learning this course">
                 Continue Learning
             </a>
         `;
@@ -223,7 +509,7 @@ function generatePurchaseActions() {
         // Show certificate download if course is completed
         if (isCompleted) {
             actionsHTML += `
-                <button onclick="downloadCertificate()" class="btn-success">
+                <button onclick="downloadCertificate()" class="btn-success" aria-label="Download course completion certificate">
                     Download Certificate
                 </button>
             `;
@@ -236,21 +522,21 @@ function generatePurchaseActions() {
         
         if (hasEnoughBalance) {
             return `
-                <button onclick="purchaseCourse()" class="btn-primary">
+                <button onclick="purchaseCourse()" class="btn-primary" aria-label="Purchase this course">
                     Buy Now
                 </button>
-                <p class="balance-info">Your balance: $${currentUser.balance}</p>
+                <p class="balance-info">Your balance: $${currentUser.balance.toFixed(2)}</p>
             `;
         } else {
             const shortfall = currentCourse.price - currentUser.balance;
             return `
-                <button class="btn-secondary" disabled>
+                <button class="btn-secondary" disabled aria-label="Cannot purchase - insufficient balance">
                     Insufficient Balance
                 </button>
-                <p class="insufficient-balance">
+                <p class="insufficient-balance" role="alert">
                     Need $${shortfall.toFixed(2)} more
                 </p>
-                <p class="balance-info">Your balance: $${currentUser.balance}</p>
+                <p class="balance-info">Your balance: $${currentUser.balance.toFixed(2)}</p>
             `;
         }
     }
@@ -312,8 +598,8 @@ async function downloadCertificate() {
 function showError(message) {
     const container = document.getElementById('courseDetailContainer');
     container.innerHTML = `
-        <div class="error-message">
-            <h3>Error</h3>
+        <div class="error-message" role="alert">
+            <h2>Error</h2>
             <p>${escapeHtml(message)}</p>
             <a href="/browse-courses" class="btn-secondary">Back to Browse</a>
         </div>
@@ -322,6 +608,7 @@ function showError(message) {
 }
 
 function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
