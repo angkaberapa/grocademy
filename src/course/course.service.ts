@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, In } from 'typeorm';
+import { Repository, ILike, In } from 'typeorm';
 import { Course } from './course.entity';
 import { CourseTopic } from './course-topic.entity';
 import { UserCourse } from '../user-courses/user-courses.entity';
@@ -101,13 +101,13 @@ export class CourseService {
       const [directMatches, topicMatches] = await Promise.all([
         this.courseRepository.find({
           where: [
-            { title: Like(searchPattern) },
-            { instructor: Like(searchPattern) },
+            { title: ILike(searchPattern) },
+            { instructor: ILike(searchPattern) },
           ],
           select: ['id'],
         }),
         this.courseTopicRepository.find({
-          where: { topic: Like(searchPattern) },
+          where: { topic: ILike(searchPattern) },
           select: ['course_id'],
         })
       ]);
@@ -333,13 +333,13 @@ export class CourseService {
       const [directMatches, topicMatches] = await Promise.all([
         this.courseRepository.find({
           where: [
-            { title: Like(searchPattern) },
-            { instructor: Like(searchPattern) },
+            { title: ILike(searchPattern) },
+            { instructor: ILike(searchPattern) },
           ],
           select: ['id'],
         }),
         this.courseTopicRepository.find({
-          where: { topic: Like(searchPattern) },
+          where: { topic: ILike(searchPattern) },
           select: ['course_id'],
         })
       ]);

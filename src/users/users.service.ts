@@ -1,6 +1,6 @@
 import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { User, UserRole } from './users.entity';
 import { UsersPaginationQueryDto } from './dto/users-query.dto';
 import { UpdateUserBodyDto } from './dto/update-user.dto';
@@ -71,10 +71,10 @@ export class UsersService {
     
     if (q) {
       whereConditions = [
-      { username: Like(`%${q}%`), role: UserRole.USER },
-      { first_name: Like(`%${q}%`), role: UserRole.USER },
-      { last_name: Like(`%${q}%`), role: UserRole.USER },
-      { email: Like(`%${q}%`), role: UserRole.USER },
+      { username: ILike(`%${q}%`), role: UserRole.USER },
+      { first_name: ILike(`%${q}%`), role: UserRole.USER },
+      { last_name: ILike(`%${q}%`), role: UserRole.USER },
+      { email: ILike(`%${q}%`), role: UserRole.USER },
       ];
     } else {
       whereConditions = { role: UserRole.USER };
