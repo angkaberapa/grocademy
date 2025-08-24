@@ -237,35 +237,41 @@ export class CourseSeeder {
     ];
 
     const courses: Partial<Course>[] = [];
-    const allTopics: Partial<CourseTopic>[] = [];
 
     for (let i = 0; i < coursesData.length; i++) {
       const courseData = coursesData[i];
-      const courseId = `course-${i + 1}`;
 
-      // Create course
+      // Create course (let TypeORM generate the UUID)
       courses.push({
-        id: courseId,
         title: courseData.title,
         description: courseData.description,
         instructor: courseData.instructor,
         price: courseData.price,
         thumbnail_image: 'https://pub-8a6e1a65654a4cfc88a11cb73b88039a.r2.dev/courses/thumbnails/1755855441736-logo.png'
       });
+    }
+
+    // Save courses first to get generated IDs
+    const savedCourses = await this.courseRepository.save(courses);
+
+    // Now create topics using the saved course IDs
+    const allTopics: Partial<CourseTopic>[] = [];
+    for (let i = 0; i < savedCourses.length; i++) {
+      const courseData = coursesData[i];
+      const savedCourse = savedCourses[i];
 
       // Create topics for this course
       for (const topic of courseData.topics) {
         allTopics.push({
-          course_id: courseId,
+          course_id: savedCourse.id,
           topic: topic
         });
       }
     }
 
-    // Save courses and topics
-    await this.courseRepository.save(courses);
+    // Save topics
     await this.courseTopicRepository.save(allTopics);
     
-    console.log(`✅ Created ${courses.length} courses with ${allTopics.length} topics`);
+    console.log(`✅ Created ${savedCourses.length} courses with ${allTopics.length} topics`);
   }
 }
