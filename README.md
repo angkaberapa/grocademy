@@ -301,68 +301,88 @@ The application uses a modern TypeScript-based stack with:
 - **File Processing**: PDF generation and file upload capabilities
 - **API Documentation**: Swagger/OpenAPI integration
 - **Validation**: Class-based validation and transformation
-
 # Endpoints
 
-## Frontend
-GET /                                     (redirect to login page)
-GET /login                                (login page)
-GET /register                             (register page)
-GET /browse-courses                       (browse courses page)
-GET /course/{id}                          (course detail page)
-GET /my-courses                           (my courses page)
-GET /course/{courseId}/modules            (course modules page)
-GET /course/{courseId}/module/{moduleId}  (module view page)
-GET /health                               (health status page)
+This section lists all available frontend and backend endpoints in the Grocademy application.
 
-## Backend
+## Frontend Endpoints
 
-### users (admin only endpoint)
-GET /api/users               (get all user with pagination and search)
-GET /api/users/{id}          (get user by ID)
-PUT /api/users/{id}          (update user information)
-DELETE /api/users/{id}       (delete user by ID)
-POST /api/users/{id}/balance (increment user balance)
+| Method | Path                                         | Description                  |
+|--------|----------------------------------------------|------------------------------|
+| GET    | `/`                                          | Redirect to login page       |
+| GET    | `/login`                                     | Login page                   |
+| GET    | `/register`                                  | Register page                |
+| GET    | `/browse-courses`                            | Browse courses page          |
+| GET    | `/course/{id}`                               | Course detail page           |
+| GET    | `/my-courses`                                | My courses page              |
+| GET    | `/course/{courseId}/modules`                 | Course modules page          |
+| GET    | `/course/{courseId}/module/{moduleId}`       | Module view page             |
+| GET    | `/health`                                    | Health status page           |
 
-### courses
-POST /api/courses                 (create a new course (admin only))
-GET /api/courses                  (get all courses with pagination and search)
-GET /api/courses/my-courses       (get courses owned by current user)
-GET /api/courses/{id}             (get course by ID)
-PUT /api/courses/{id}             (update course by ID (admin only))
-DELETE /api/courses/{id}          (delete course by ID (admin only))
-POST /api/courses/{id}/buy        (buy a course)
-GET /api/courses/{id}/buy-status  (check if user owns a course)
-GET /api/courses/{id}/certificate (get course certificate if completed)
+## Backend Endpoints
 
-### modules
-POST /api/courses/{courseId}/modules          (create a new module for a course (admin only))
-GET /api/courses/{courseId}/modules           (get all modules for a course)
-GET /api/modules/{id}                         (get module by ID)
-PUT /api/modules/{id}                         (update module by id (admin only))
-DELETE /api/modules/{id}                      (delete module by id (admin only))
-PATCH /api/courses/{courseId}/modules/reorder (reorder modules in a course (admin only))
-PATCH /api/modules/{id}/complete              (mark module as completed)
+### Users (Admin Only)
 
-### auth
-POST /api/auth/login    (user login)
-POST /api/auth/register (user register)
-GET /api/auth/self      (get current user profile)
-POST /api/auth/logout   (user logout)
+| Method | Path                        | Description                              |
+|--------|-----------------------------|------------------------------------------|
+| GET    | `/api/users`                | Get all users (pagination & search)      |
+| GET    | `/api/users/{id}`           | Get user by ID                           |
+| PUT    | `/api/users/{id}`           | Update user information                  |
+| DELETE | `/api/users/{id}`           | Delete user by ID                        |
+| POST   | `/api/users/{id}/balance`   | Increment user balance                   |
+
+### Courses
+
+| Method | Path                                 | Description                                 |
+|--------|--------------------------------------|---------------------------------------------|
+| POST   | `/api/courses`                       | Create a new course (admin only)            |
+| GET    | `/api/courses`                       | Get all courses (pagination & search)       |
+| GET    | `/api/courses/my-courses`            | Get courses owned by current user           |
+| GET    | `/api/courses/{id}`                  | Get course by ID                            |
+| PUT    | `/api/courses/{id}`                  | Update course by ID (admin only)            |
+| DELETE | `/api/courses/{id}`                  | Delete course by ID (admin only)            |
+| POST   | `/api/courses/{id}/buy`              | Buy a course                                |
+| GET    | `/api/courses/{id}/buy-status`       | Check if user owns a course                 |
+| GET    | `/api/courses/{id}/certificate`      | Get course certificate if completed         |
+
+### Modules
+
+| Method | Path                                                    | Description                                 |
+|--------|---------------------------------------------------------|---------------------------------------------|
+| POST   | `/api/courses/{courseId}/modules`                       | Create a new module for a course (admin only)|
+| GET    | `/api/courses/{courseId}/modules`                       | Get all modules for a course                |
+| GET    | `/api/modules/{id}`                                     | Get module by ID                            |
+| PUT    | `/api/modules/{id}`                                     | Update module by ID (admin only)            |
+| DELETE | `/api/modules/{id}`                                     | Delete module by ID (admin only)            |
+| PATCH  | `/api/courses/{courseId}/modules/reorder`               | Reorder modules in a course (admin only)    |
+| PATCH  | `/api/modules/{id}/complete`                            | Mark module as completed                    |
+
+### Authentication
+
+| Method | Path                 | Description         |
+|--------|----------------------|---------------------|
+| POST   | `/api/auth/login`    | User login          |
+| POST   | `/api/auth/register` | User registration   |
+| GET    | `/api/auth/self`     | Get current profile |
+| POST   | `/api/auth/logout`   | User logout         |
 
 # Implemented Bonus
 
 # [B05] - Lighthouse 
 
 Overall Score is calculated by averaging the Performance, Accessibility, Best Practices, and SEO scores.
+## Lighthouse Scores by Page
 
-Login Page            Overall Score: 99
-Register Page         Overall Score: 99
-Browse Courses Page   Overall Score: 97.5
-My Courses Page       Overall Score: 96.5
-Course Detail Page    Overall Score: 97.25
-Course Modules Page   Overall Score: 98.25
-Module View Page      Overall Score: 97.25
+| Page                | Overall Score |
+|---------------------|:-------------:|
+| Login Page          |      99       |
+| Register Page       |      99       |
+| Browse Courses Page |     97.5      |
+| My Courses Page     |     96.5      |
+| Course Detail Page  |    97.25      |
+| Course Modules Page |    98.25      |
+| Module View Page    |    97.25      |
+
 
 Average Overall Score: 97.82
 
