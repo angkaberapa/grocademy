@@ -369,7 +369,7 @@ This section lists all available frontend and backend endpoints in the Grocademy
 
 # [B05] - Lighthouse 
 
-Overall Score is calculated by averaging the Performance, Accessibility, Best Practices, and SEO scores.
+Overall Score is calculated by averaging the Performance, Accessibility, Best Practices, and SEO scores. (see docs/Lighthouse folder for the detailed screenshots)
 ## Lighthouse Scores by Page
 
 | Page                | Overall Score |
