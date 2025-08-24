@@ -128,7 +128,7 @@ export class AuthService {
       email: 'admin@grocademy.com',
       password: hashedPassword,
       role: UserRole.ADMIN,
-      balance: 0,
+      balance: 10000,
     };
 
     await this.usersService.create(adminData);

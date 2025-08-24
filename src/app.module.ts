@@ -1,5 +1,5 @@
 // src/app.module.ts
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/users.entity';
 import { Course } from './course/course.entity';
@@ -13,9 +13,11 @@ import { ModuleModule } from './module/module.module';
 import { UserCoursesModule } from './user-courses/user-courses.module';
 import { UserModuleProgressModule } from './user-module-progress/user-module-progress.module';
 import { AuthModule } from './auth/auth.module';
+import { SeederModule } from './database/seeders/seeder.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigService, ConfigModule } from '@nestjs/config';
+import { DatabaseSeeder } from './database/seeders/database.seeder';
 
 @Module({
   imports: [
@@ -39,8 +41,20 @@ import { ConfigService, ConfigModule } from '@nestjs/config';
     UserCoursesModule,
     UserModuleProgressModule,
     AuthModule,
+    SeederModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private readonly databaseSeeder: DatabaseSeeder) {}
+
+  async onModuleInit() {
+    // Only run seeder in development or if ENABLE_SEEDING is true
+    const shouldSeed = process.env.NODE_ENV === 'development' || process.env.ENABLE_SEEDING === 'true';
+    
+    if (shouldSeed) {
+      await this.databaseSeeder.seed();
+    }
+  }
+}

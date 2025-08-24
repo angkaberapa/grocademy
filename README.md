@@ -40,20 +40,19 @@ Copy the example environment file and configure it for your setup:
 cp .env.example .env
 ```
 
-To test the Cloudflare R2 Bucket, please contact the author (ID Line: brutalwitch) to get the credentials then edit the `.env` file and update the following important values:
-`R2_ACCESS_KEY_ID` : your-r2-access-key-id
-`R2_SECRET_ACCESS_KEY` : your-r2-secret-access-key
-`R2_BUCKET_NAME` : your-bucket-name
-`R2_ENDPOINT` : https://your-account-id.r2.cloudflarestorage.com
-`R2_PUBLIC_URL` : https://pub-your-bucket-id.r2.dev
-`R2_REGION` : auto
-
 ## Step 3: Docker Compose
 
 ### 3.1 Build and Start with Docker Compose (Development)
 ```bash
 # Build and start all services (database + application)
 docker-compose -f docker-compose.dev.yml up --build -d
+```
+
+**Note:** The application will automatically seed the database with sample data on first run:
+- 31 users (1 admin + 30 regular users)
+- 30 courses with realistic content
+- 1-20 modules per course (randomly generated)
+- Admin credentials: `admin` / `admin123`
 
 ### 3.2 Access the Application
 - **Main Application**: http://localhost:3000
@@ -68,7 +67,7 @@ docker-compose -f docker-compose.dev.yml down
 docker-compose -f docker-compose.dev.yml down -v
 ```
 
-## Step 8: Testing the Application
+## Step 4: Testing the Application
 
 ### API Testing
 - Visit http://localhost:3000/api/docs for Swagger documentation
@@ -654,4 +653,18 @@ export class AuthModule {}
 
 # [B11] - Bucket
 
-Author use Cloudflare R2 for the cloud provider to store media files.
+This project implements cloud object storage for media using Cloudflare R2. Media assets (course thumbnails, module PDFs/videos) are stored in an R2 bucket so application source code and large media files are separated.
+
+To test the Cloudflare R2 Bucket from FE admin, please contact the author (ID Line: brutalwitch) to get the credentials then edit the `.env` file and update the following important values:
+`R2_ACCESS_KEY_ID` : your-r2-access-key-id
+`R2_SECRET_ACCESS_KEY` : your-r2-secret-access-key
+`R2_BUCKET_NAME` : your-bucket-name
+`R2_ENDPOINT` : https://your-account-id.r2.cloudflarestorage.com
+`R2_PUBLIC_URL` : https://pub-your-bucket-id.r2.dev
+`R2_REGION` : auto
+
+### Sample Data URLs
+All seeded content uses the following R2 bucket URLs:
+- **Course Thumbnails**: `https://pub-8a6e1a65654a4cfc88a11cb73b88039a.r2.dev/courses/thumbnails/1755855441736-logo.png`
+- **Module PDFs**: `https://pub-8a6e1a65654a4cfc88a11cb73b88039a.r2.dev/modules/pdfs/Kalender_Pendidikan_2025_2026_No_496.pdf`
+- **Module Videos**: `https://pub-8a6e1a65654a4cfc88a11cb73b88039a.r2.dev/modules/videos/8820216-uhd_3840_2160_25fps.mp4`
