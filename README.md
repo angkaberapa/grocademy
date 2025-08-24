@@ -28,7 +28,7 @@ docker-compose --version  # Should show Docker Compose version
 ## Step 1: Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/angkaberapa/grocademy.git
 cd grocademy
 ```
 
